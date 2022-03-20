@@ -27,18 +27,3 @@ class Block:
         # return cls
         return f"Block {self.index}: {self.block_data}"
 
-
-def main():
-    block1 = Block()
-    print(str(block1))
-    time.sleep(1)
-    block2 = Block(1, 1000, block1.generate_hash())
-    print(str(block2))
-    time.sleep(1)
-    block3 = Block(2, 10000, block2.generate_hash())
-    print(str(block3))
-
-
-if __name__ == '__main__':
-    main()
-

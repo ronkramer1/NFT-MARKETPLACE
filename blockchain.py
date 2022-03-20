@@ -24,13 +24,4 @@ class Blockchain:
         return ret_str[:-1]
 
 
-def main():
-    blockchain = Blockchain()
-    blockchain.create_block('transferred 0.1 KCN to Ron')
-    blockchain.create_block('received 100 KCN from Nadav')
-    blockchain.create_block('minted NFT bored ape')
-    print(blockchain)
 
-
-if __name__ == '__main__':
-    main()
