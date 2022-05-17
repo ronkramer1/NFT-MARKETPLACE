@@ -25,7 +25,6 @@ class Blockchain:
     #                        sort_keys=True, indent=4))
 
     def serialize(self):
-        """returns a json representation of the blockchain"""
         blockchain_dict = dict(self.__dict__)
         block_list = []
         for block in blockchain_dict["chain"]:
@@ -40,7 +39,6 @@ class Blockchain:
 
     @staticmethod
     def deserialize(data):
-        """takes a json representation of a blockchain (str) and returns a blockchain (Blockchain)"""
         data_dict = json.loads(data)
         block_list = []
         for block in data_dict["chain"]:

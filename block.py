@@ -26,7 +26,6 @@ class Block:
         return hashlib.sha256(str(self.block_data).encode()).hexdigest()
 
     def serialize(self):
-        """returns a (json) string representation of the block"""
         block_dict = dict(self.__dict__)
         transaction_list = []
         for transaction in block_dict["data"]:
@@ -36,7 +35,6 @@ class Block:
 
     @staticmethod
     def deserialize(data):
-        """takes a json representation of a block and returns the represented block"""
         if type(data) == str:
             data_dict = json.loads(data)
         else:
