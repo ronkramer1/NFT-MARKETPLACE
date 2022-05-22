@@ -23,21 +23,33 @@ class Wallet:
     def sign_transaction(self, receiver, amount):
         sender = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
         fee = amount * FEE_CONSTANT
-        hashed_transaction = sha256_hash(sender, receiver, amount, fee)
+        transaction_hash = sha256_hash(sender, receiver, amount, fee)
         signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
-        signature = signer.sign(hashed_transaction)
+        signature = signer.sign(transaction_hash)
         return signature
 
-    def verify_transaction(self, hashed_transaction, signature):
+    def verify_transaction(self, transaction_hash, signature):
         verifier = DSS.new(self.public_key, STANDARD_FOR_SIGNATURES)
-        return verifier.verify(hashed_transaction, signature)
+        return verifier.verify(transaction_hash, signature)
 
     def make_transaction(self, receiver, amount):
-        self.transaction_pool.append(Transaction(receiver, self.public_key.export_key(format=PUBLIC_KEY_FORMAT), amount,
-                                                 self.sign_transaction(receiver, amount), amount * FEE_CONSTANT))
+        transaction = Transaction(str(receiver), str(self.public_key.export_key(format=PUBLIC_KEY_FORMAT)), amount,
+                                  str(self.sign_transaction(receiver, amount)))
+        self.transaction_pool.append(transaction)
+
+    def sign_block(self, block):
+        block_hash = sha256_hash(block.index, block.prev_hash, block.data)
+        signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
+        signature = str(signer.sign(block_hash))
+        return signature
 
     def create_block(self):
-        pass
+        block = self.blockchain.create_block(self.transaction_pool[-1])
+        signature = self.sign_block(block)
+        block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
+        block.signature = signature
+        self.transaction_pool = []
+        return block
 
     # blockchain file:
     def create_blockchain_file(self):
@@ -49,8 +61,20 @@ class Wallet:
         except (IOError, json.decoder.JSONDecodeError):
             with open("storage\\blockchain.json", "w") as blockchain_file:
                 blockchain_file.write(self.blockchain.serialize())
-        with open("storage\\blockchain.json", "r") as blockchain_file:
-            self.blockchain = Blockchain.deserialize(blockchain_file.read())
+        try:
+            with open("storage\\blockchain.json", "r") as blockchain_file:
+                self.blockchain = Blockchain.deserialize(blockchain_file.read())
+        except (IOError, json.decoder.JSONDecodeError):
+            print("file is empty")
+
+    def write_to_file(self):
+        with open(f"storage\\blockchain.json", "w") as blockchain_file:
+            blockchain_file.write(self.blockchain.serialize())
+
+    def make_transaction_and_add_to_blockchain(self, receiver, amount):
+        self.make_transaction(receiver, amount)
+        self.create_block()
+        self.write_to_file()
 
     def __str__(self):
         return f"secret_key: {self.private_key}\n" \

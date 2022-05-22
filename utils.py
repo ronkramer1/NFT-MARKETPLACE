@@ -6,7 +6,7 @@ config = configparser.ConfigParser()
 try:
     config.read('configure.ini')
 
-    FEE_CONSTANT = int(config['transaction']['FEE_CONSTANT'])
+    FEE_CONSTANT = float(config['transaction']['FEE_CONSTANT'])
     NUM_OF_TRANSACTIONS_IN_BLOCK = int(config['cryptography']['NUM_OF_TRANSACTIONS_IN_BLOCK'])
 
     CURVE = config['cryptography']['CURVE']
@@ -14,8 +14,11 @@ try:
     PUBLIC_KEY_FORMAT = config['cryptography']['PUBLIC_KEY_FORMAT']
     PRIVATE_KEY_FORMAT = config['cryptography']['PRIVATE_KEY_FORMAT']
     PRIVATE_KEY_PROTECTION = config['cryptography']['PRIVATE_KEY_PROTECTION']
-    NUM_OF_TRANSACTIONS_IN_BLOCK = int(config['cryptography']['NUM_OF_TRANSACTIONS_IN_BLOCK'])
     STANDARD_FOR_SIGNATURES = config['cryptography']['STANDARD_FOR_SIGNATURES']
+    STAKE_ADDRESS = config['cryptography']['STAKE_ADDRESS']
+
+    NUMBER_OF_COINS = float(config['ICH']['NUMBER_OF_COINS'])
+    INITIAL_COIN_HOLDER = config['ICH']['INITIAL_COIN_HOLDER']
 
     RECV_SIZE = eval(config['networking']['RECV_SIZE'])
     UDP_PORT = int(config['networking']['UDP_PORT'])

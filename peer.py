@@ -50,6 +50,6 @@ class Peer:
                 received_message = self.udp_receive()
                 self.received_from_udp_socket(received_message)
 
+    @staticmethod
     def received_from_udp_socket(self, message):
         print(message)
-

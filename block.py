@@ -4,6 +4,7 @@ import json
 import time
 
 from transaction import Transaction
+from utils import sha256_hash
 
 
 class Block:
@@ -13,17 +14,12 @@ class Block:
         self.data = data
         self.timestamp = timestamp
         self.prev_hash = prev_hash
-        self.block_data = f"{self.data} - {self.prev_hash} - {self.timestamp}"
         self.validator = validator
         self.signature = signature
-        # self.index = index
-        # self.data = data
-        # # self.timestamp = generate_timestamp()
-        # self.prev_hash = prev_hash
-        # self.block_data = f"{self.data} - {self.prev_hash}"
 
     def generate_hash(self):
-        return hashlib.sha256(str(self.block_data).encode()).hexdigest()
+        return sha256_hash(self.index, self.data, self.timestamp, self.prev_hash, self.validator, self.signature).\
+            hexdigest()
 
     def serialize(self):
         block_dict = dict(self.__dict__)
@@ -39,25 +35,22 @@ class Block:
             data_dict = json.loads(data)
         else:
             data_dict = data
-        transaction_list = []
-        for transaction in data_dict["data"]:
-            transaction_list.append(Transaction.deserialize(transaction))
+
+        transaction = Transaction.deserialize(data_dict["data"])
         return Block(data_dict["index"],
                      data_dict["prev_hash"],
-                     transaction_list,
-                     data_dict["timestamp"])
-                     # data_dict["validator"],
-                     # data_dict["signature"])
-
+                     transaction,
+                     data_dict["timestamp"],
+                     data_dict["validator"],
+                     data_dict["signature"])
 
     def __str__(self):
-        # return '%s(%s)' % (
-        #     type(self).__name__,
-        #     ', '.join('%s=%s' % item for item in vars(self).items())
-        # )
-        # cls.__str__ = __str__
-        # return cls
-        return f"Block {self.index}: {self.block_data}"
+        return f"index: {self.index}\n" \
+               + f"data: {self.data}\n" \
+               + f"timestamp: {self.timestamp}\n" \
+               + f"prev_hash: {self.prev_hash}\n" \
+               + f"validator: {self.validator}\n" \
+               + f"signature: {self.signature}\n"
 
 
 def main():

@@ -4,13 +4,20 @@ from utils import *
 
 
 class Transaction:
-    def __init__(self, receiver="also ron", sender="ron", amount=1, signature="", fee=0):
+    def __init__(self, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature=""):
         self.amount = amount
-        self.fee = float(amount * FEE_CONSTANT / 100)
         self.sender = sender
         self.receiver = receiver
         self.signature = signature
-        self.fee = fee
+        if receiver == INITIAL_COIN_HOLDER:
+            self.fee = 0
+        else:
+            self.fee = float(amount * FEE_CONSTANT / 100)
+
+    def validate_transaction(self, blockchain):
+        if not (blockchain.get_balance(self.sender) >= self.amount + self.fee):
+            return False
+        return True
 
     def serialize(self):
         return str(json.dumps(self.__dict__, indent=4))
@@ -19,13 +26,13 @@ class Transaction:
     def deserialize(data):
         if type(data) == str:
             data_dict = json.loads(data)
+            print(data_dict)
         elif type(data) == dict:
             data_dict = data
         return Transaction(data_dict["receiver"],
                            data_dict["sender"],
                            data_dict["amount"],
-                           data_dict["signature"],
-                           data_dict["fee"])
+                           data_dict["signature"])
 
     def __str__(self):
         return f"signature: {self.signature}\n" \
