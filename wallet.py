@@ -1,4 +1,6 @@
 import json
+import random
+
 from Crypto.PublicKey import ECC
 from Crypto.Signature import DSS
 
@@ -28,10 +30,6 @@ class Wallet:
         signature = signer.sign(transaction_hash)
         return signature
 
-    def verify_transaction(self, transaction_hash, signature):
-        verifier = DSS.new(self.public_key, STANDARD_FOR_SIGNATURES)
-        return verifier.verify(transaction_hash, signature)
-
     def make_transaction(self, receiver, amount):
         transaction = Transaction(str(receiver), str(self.public_key.export_key(format=PUBLIC_KEY_FORMAT)), amount,
                                   str(self.sign_transaction(receiver, amount)))
@@ -42,6 +40,18 @@ class Wallet:
         signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
         signature = str(signer.sign(block_hash))
         return signature
+
+    def choose_validator(self):
+        validators = self.blockchain.get_validators_dict()
+        total_staked = sum(validators.values())
+        weights = []
+
+        for validator in validators:
+            weights.append(float(validators[validator]/total_staked))
+
+        selected_validator = random.choices(list(validators.keys()), weights=weights, k=1)[0]
+        # return selected_validator, validators[selected_validator]
+        return selected_validator
 
     def create_block(self):
         block = self.blockchain.create_block(self.transaction_pool[-1])

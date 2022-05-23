@@ -4,15 +4,12 @@ from utils import *
 
 
 class Transaction:
-    def __init__(self, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature=""):
+    def __init__(self, receiver="", sender="", amount=NUMBER_OF_COINS, signature=""):
         self.amount = amount
         self.sender = sender
         self.receiver = receiver
         self.signature = signature
-        if receiver == INITIAL_COIN_HOLDER:
-            self.fee = 0
-        else:
-            self.fee = float(amount * FEE_CONSTANT / 100)
+        self.fee = float(amount * FEE_CONSTANT / 100)
 
     def validate_transaction(self, blockchain):
         if not (blockchain.get_balance(self.sender) >= self.amount + self.fee):

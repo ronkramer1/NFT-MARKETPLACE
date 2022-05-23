@@ -3,6 +3,7 @@ import json
 from block import *
 from utils import *
 
+
 class Blockchain:
     def __init__(self, chain=None):
         if chain is None:
