@@ -51,7 +51,7 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    main_wallet = main.recreate_wallet("ronronron")
+    main_wallet = main.create_wallet()
     second_wallet = main.create_wallet2()
     main_wallet.create_blockchain_file()
     second_wallet.create_blockchain_file()

@@ -4,10 +4,10 @@
             "index": 0,
             "data": {
                 "amount": 1,
-                "fee": 0.0002,
                 "sender": "ron",
                 "receiver": "also ron",
-                "signature": ""
+                "signature": "",
+                "fee": 0.0002
             },
             "timestamp": "2022-05-19 22:55:01.887704",
             "prev_hash": "",
@@ -18,10 +18,10 @@
             "index": 1,
             "data": {
                 "amount": 54,
-                "fee": 0.0108,
                 "sender": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEq9TqgCdqmIYNb6gfJAxdv+E3fCi6\nmA9/JZbzYPIddF/vXqKr90KYK9NkzpC6Ce9eRznAs+lQBwOAEi0ud7PG6A==\n-----END PUBLIC KEY-----",
                 "receiver": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYFYWL+SL+22SZSOkZRXzE/xmh/Em\n8Kx19sRtPYD9sAfJJuDe03gC/zhUsHeubch46zmLVtN+plBisQNTg0UkSg==\n-----END PUBLIC KEY-----",
-                "signature": "b'o\\x97\\t\\x88\\xf1bfW?\\x0f-\\x93x\\x0b\\xb9\\x11\\xfdP\\xd0\\xf6\\x154\\x14\\xd5a\\xeb\\xc3%\\x1d\\xb4h\\xe7\\xc7\\xa3y\\xe4\\x9d\\\\R\\xbf\\xb4\\xe2QL\\xdbX]\\xc4\\x9c\\xc8M\\xfe\\xbcBk\\xde6EZ\\xb5\\xcb\\xe2\\x97{'"
+                "signature": "b'o\\x97\\t\\x88\\xf1bfW?\\x0f-\\x93x\\x0b\\xb9\\x11\\xfdP\\xd0\\xf6\\x154\\x14\\xd5a\\xeb\\xc3%\\x1d\\xb4h\\xe7\\xc7\\xa3y\\xe4\\x9d\\\\R\\xbf\\xb4\\xe2QL\\xdbX]\\xc4\\x9c\\xc8M\\xfe\\xbcBk\\xde6EZ\\xb5\\xcb\\xe2\\x97{'",
+                "fee": 0.0108
             },
             "timestamp": "2022-05-19 22:55:01.887704",
             "prev_hash": "26b1d9e4b99a93a835b46fb3999a28d80ce6f52b51e03671890756e282151ad1",
@@ -32,15 +32,29 @@
             "index": 2,
             "data": {
                 "amount": 54,
-                "fee": 0.0108,
                 "sender": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEq9TqgCdqmIYNb6gfJAxdv+E3fCi6\nmA9/JZbzYPIddF/vXqKr90KYK9NkzpC6Ce9eRznAs+lQBwOAEi0ud7PG6A==\n-----END PUBLIC KEY-----",
                 "receiver": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE30q5zSi1fHleL4S/8uk87MBKq4O1\n6kmai3r1uctAjPIRhpsGyQ5ATY/2bsJmW57g4aPB3RbpkAFXsVjXK9Hhdg==\n-----END PUBLIC KEY-----",
-                "signature": "b'\\x8f\\xfd\\x9f\\xd3\\xa0\\xf3\\xb6\\x98\\xe8.\\x81a\\xbbj\\x9c0B\\xb2R\\n\\x03\\xe7\\xe8\"w\\xce\\x00\\x13\\xab\\xda\\x89\\xf9\\xe7\"\\xe4\\x8a\\x19eXx\\xcf\\xc10\\x8a\\x1a\\x05\\xa5\\x98\\x8d\\xe0\\x16\\xf0\\x1a\\xc4\\xc3P\\t\\xfd\\xd9\\xf0k\\xba\\xf2\\xa0'"
+                "signature": "b'\\x8f\\xfd\\x9f\\xd3\\xa0\\xf3\\xb6\\x98\\xe8.\\x81a\\xbbj\\x9c0B\\xb2R\\n\\x03\\xe7\\xe8\"w\\xce\\x00\\x13\\xab\\xda\\x89\\xf9\\xe7\"\\xe4\\x8a\\x19eXx\\xcf\\xc10\\x8a\\x1a\\x05\\xa5\\x98\\x8d\\xe0\\x16\\xf0\\x1a\\xc4\\xc3P\\t\\xfd\\xd9\\xf0k\\xba\\xf2\\xa0'",
+                "fee": 0.0108
             },
             "timestamp": "2022-05-19 23:00:23.709574",
             "prev_hash": "29eacd0c5c9d98ba78835467fdc1b08bc4ab866fef5c5cb9922dcaa175dcb754",
             "validator": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEq9TqgCdqmIYNb6gfJAxdv+E3fCi6\nmA9/JZbzYPIddF/vXqKr90KYK9NkzpC6Ce9eRznAs+lQBwOAEi0ud7PG6A==\n-----END PUBLIC KEY-----",
             "signature": "b\"kl\\xcc\\x1f\\x8c\\xbd\\x95\\xfb\\x1c')\\x1d\\tC\\xb5v:\\xd7~s0M\\x1d`vr\\xbb\\xa1%\\xdd\\x82~\\xae\\xe8<7\\xb9\\x936#\\x9a\\x0e\\x9fh\\xe4M\\xaa\\xe2\\xac-\\x14k\\x87\\x132+n`Q\\x97%a\\xfe\\x12\""
+        },
+        {
+            "index": 3,
+            "data": {
+                "amount": 54,
+                "sender": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEMH33ZGrIl6hLefoZixEXVpj2/xyA\n4gBCtGXqvPG/FxbVdu95ZycTFfpC3xsUpxCq4WmaztwSKnVa/7pNTKoayQ==\n-----END PUBLIC KEY-----",
+                "receiver": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIny4o9aURWvq/JUg26FLyV5l4it9\npXQ5E4OnJyrsbShnPxZnE7qRG4xt9kFqNIXLtqx12SBn6Sx5QyAQiYjtwA==\n-----END PUBLIC KEY-----",
+                "signature": "b'\\xb8\\xe8\\xaf*ec\\x18\\x15\\x1b\\xf7\\xb3\\x01\\xf4x\\x81\\x8e(%\\x00\\xcb2rUA\\x92\\xa1\\xca`\\xad\\x9eo\\x17\\xf3X\\rV_\\xabqu\\x92\\xf7\\xff\\xc1\\xe1>\\x0e\\xb6US\\x08\\xb9\\xafD\\x08\\x7fP\\x87\\xc09BA\\x8a\\xb1'",
+                "fee": 0.0108
+            },
+            "timestamp": "2022-05-23 01:58:20.333432",
+            "prev_hash": "e8764852d1a1245e339d7023e15a0c8f7ab313d4fda7fee7e990a1bbc9537b1a",
+            "validator": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEMH33ZGrIl6hLefoZixEXVpj2/xyA\n4gBCtGXqvPG/FxbVdu95ZycTFfpC3xsUpxCq4WmaztwSKnVa/7pNTKoayQ==\n-----END PUBLIC KEY-----",
+            "signature": "b'\\xd0 \\xda\\xac\\x1f\\xab\\x84Dd\\xe9\\xdb\\xe6]\\xbd\\xeb${e{Z\\xe9\\xbb?U\\xf6\\xea\\xc0(\\x84\\xe4\\x9bn|\\\\\\x05_Tf\\xf01dNz\\xc2B\\xc8\\xd17-@\\x8a}\\xe8\\xc8\\xf4\\xd3\\x0ci\\xe1\\x97r-\\xbf\\xce'"
         }
     ]
 }
