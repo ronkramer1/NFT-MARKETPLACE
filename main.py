@@ -48,14 +48,28 @@ class Main:
 
         return self.wallet
 
+    def recreate_wallet2(self, password):
+        try:
+            with open(f"storage\\private key 2.txt", 'r') as secret_key_file:
+                protected_secret_key = secret_key_file.read()
+                self.wallet = Wallet(ECC.import_key(protected_secret_key, passphrase=password))
+        except ValueError:
+            print("password doesn't match the protected private key that was provided.")
+        except (IndexError, FileNotFoundError) as e:
+            print("there is no wallet on this device.")
+
+        return self.wallet
+
 
 if __name__ == "__main__":
     main = Main()
     main_wallet = main.recreate_wallet("ronronron")
-    second_wallet = main.create_wallet2()
+    second_wallet = main.recreate_wallet2("hello")
     main_wallet.create_blockchain_file()
     second_wallet.create_blockchain_file()
 
-    main_wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT),
-                                                       54)
-    print(main_wallet.blockchain)
+    # second_wallet.make_transaction_and_add_to_blockchain(STAKE_ADDRESS,
+    #                                                    55)
+
+    # print(main_wallet.blockchain)
+    print(main_wallet.choose_validator())

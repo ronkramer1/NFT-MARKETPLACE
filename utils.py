@@ -1,6 +1,7 @@
 import configparser
 
 from Crypto.Hash import SHA256
+from Crypto.Signature import DSS
 
 config = configparser.ConfigParser()
 try:
@@ -45,3 +46,8 @@ def sha256_hash(*args):
         str_rep += str(arg)
 
     return SHA256.new(str_rep.encode())
+
+
+def verify(self, hash_value, signature):
+    verifier = DSS.new(self.public_key, STANDARD_FOR_SIGNATURES)
+    return verifier.verify(hash_value, signature)
