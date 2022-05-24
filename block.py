@@ -24,9 +24,8 @@ class Block:
     def serialize(self):
         block_dict = dict(self.__dict__)
         transaction_list = []
-        for transaction in block_dict["data"]:
-            transaction_list.append(transaction.__dict__)
-        block_dict["data"] = transaction_list
+        transaction = block_dict["data"]
+        block_dict["data"] = transaction.__dict__
         return str(json.dumps(block_dict, indent=4))
 
     @staticmethod

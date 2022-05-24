@@ -169,16 +169,16 @@ class Main:
         collect_blocks_networking()
 
 
-
 if __name__ == "__main__":
     main = Main()
     main_wallet = main.recreate_wallet("ronronron")
     second_wallet = main.recreate_wallet2("hello")
     main_wallet.create_blockchain_file()
     second_wallet.create_blockchain_file()
+    main.peer.udp_send(Block())
 
     # second_wallet.make_transaction_and_add_to_blockchain(STAKE_ADDRESS,
     #                                                    55)
 
     # print(main_wallet.blockchain)
-    print(main_wallet.choose_validator())
+    # print(main_wallet.choose_validator())
