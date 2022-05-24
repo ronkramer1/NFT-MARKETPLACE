@@ -53,6 +53,10 @@ class Wallet:
         # return selected_validator, validators[selected_validator]
         return selected_validator
 
+    def add_proposed_block(self, block):
+        """adds a block the the proposed blocks list"""
+        self.proposed_blocks.append(block)
+
     def create_block(self):
         block = self.blockchain.create_block(self.transaction_pool[-1])
         signature = self.sign_block(block)
@@ -60,6 +64,19 @@ class Wallet:
         block.signature = signature
         self.transaction_pool = []
         return block
+
+    def add_a_block_to_chain(self):
+        """adds a block from the proposed blocks to the blockchain iff the block is valid and its validator is the current leader, also empties the transaction pool and the proposed blocks list"""
+        # if len(self.proposed_blocks) > 10:
+        current_leader = self.get_leader()
+        for block in self.proposed_blocks:
+            if block.is_valid(self.blockchain) and block.validator == current_leader:
+                self.blockchain.chain.append(block)
+                self.transaction_pool = []
+                self.proposed_blocks = []
+                return True
+
+        return False
 
     # blockchain file:
     def create_blockchain_file(self):
