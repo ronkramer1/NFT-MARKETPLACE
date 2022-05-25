@@ -1,8 +1,11 @@
+import sys
+import time
 from select import select
 
 from Crypto.PublicKey import ECC
 
 from block import Block
+from gui import Ui_MainWindow
 from peer import Peer
 from transaction import Transaction
 from utils import *
@@ -15,6 +18,10 @@ from PyQt5 import QtCore as qtc
 class Main:
 
     def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
         self.wallet = None
         self.peer = Peer()
         self.finished_collecting_missing_blocks_by_button = False  # for checking if finished collecting missing blocks
@@ -153,28 +160,26 @@ class Main:
 
     def constant_receive(self):
         """tries to receive messages from other peers (both tcp and udp), calls itself every 0.1 seconds"""
-        while True:
-            if self.peer.tcp_client:
-                rlist, wlist, xlist = select([self.peer.udp_receiver, self.peer.tcp_client], [], [], 0.01)
-            else:
-                rlist, wlist, xlist = select([self.peer.udp_receiver], [], [], 0.01)
-            for sock in rlist:
-                if sock == self.peer.udp_receiver:
-                    received_message = self.peer.udp_receive()
-                    print(received_message)
-                    self.received_from_udp_socket(received_message)
+        if self.peer.tcp_client:
+            rlist, wlist, xlist = select([self.peer.udp_receiver, self.peer.tcp_client], [], [], 0.01)
+        else:
+            rlist, wlist, xlist = select([self.peer.udp_receiver], [], [], 0.01)
+        for sock in rlist:
+            if sock == self.peer.udp_receiver:
+                received_message = self.peer.udp_receive()
+                self.received_from_udp_socket(received_message)
 
-                if sock == self.peer.tcp_client:
-                    try:
-                        received_message = sock.recv(RECV_SIZE).decode()
-                        print(received_message)
-                    except ConnectionResetError:
-                        received_message = ''
-                    if received_message[:len("position ")] == "position ":
-                        block_position_from_end_of_chain_to_send = int(received_message[len("position "):])
-                        self.send_a_missing_block(block_position_from_end_of_chain_to_send)
-                    elif received_message[len("finished"):] == "finished" or received_message == '':
-                        self.peer.close_client()
+            if sock == self.peer.tcp_client:
+                try:
+                    received_message = sock.recv(RECV_SIZE).decode()
+                    print("received tcp: " + str(received_message))
+                except ConnectionResetError:
+                    received_message = ''
+                if received_message[:len("position ")] == "position ":
+                    block_position_from_end_of_chain_to_send = int(received_message[len("position "):])
+                    self.send_a_missing_block(block_position_from_end_of_chain_to_send)
+                elif received_message[len("finished"):] == "finished" or received_message == '':
+                    self.peer.close_client()
 
         qtc.QTimer.singleShot(100, self.constant_receive)
 
@@ -266,7 +271,8 @@ class Main:
                     if received_message[:len("Block: ")] == "Block: ":
                         received_message = received_message[len("Block: "):]
                         received_block = Block.deserialize(received_message)
-                        if received_block.block_number not in [block.block_number for block in self.wallet.blockchain.chain]:  # if block number isn't alewady in chain
+                        if received_block.block_number not in [block.block_number for block in
+                                                               self.wallet.blockchain.chain]:  # if block number isn't alewady in chain
                             if sock not in missing_blocks_by_peer:
                                 missing_blocks_by_peer[sock] = []
                             missing_blocks_by_peer[sock].append(received_block)
@@ -331,14 +337,23 @@ class Main:
 
 
 if __name__ == "__main__":
-    main = Main()
-    main_wallet = main.recreate_wallet("ronronron")
-    second_wallet = main.recreate_wallet2("hello")
-    main_wallet.create_blockchain_file()
-    second_wallet.create_blockchain_file()
-    # main.peer.udp_send(Block())
-    print(main.constant_receive())
-    print(main.wallet.blockchain)
+    app = qtw.QApplication(sys.argv)
+    MainWindow = qtw.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+
+    # main = Main()
+    # main_wallet = main.recreate_wallet("ronronron")
+    # second_wallet = main.recreate_wallet2("hello")
+    # main_wallet.create_blockchain_file()
+    # second_wallet.create_blockchain_file()
+    # # main.peer.udp_send(Block())
+    # while 1:
+    #     main.constant_receive()
+    #     time.sleep(0.1)
+    # print(main.wallet.blockchain)
 
     # second_wallet.make_transaction_and_add_to_blockchain(STAKE_ADDRESS,
     #                                                    55)

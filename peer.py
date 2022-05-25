@@ -39,6 +39,7 @@ class Peer:
     def tcp_client_send(self, to_send):
         """sends a tcp message to a server (a new peer that's asking for missing blocks)"""
         if type(to_send) == Block:
+            print("here")
             self.tcp_client.send(("Block: " + to_send.serialize()).encode('utf-8'))
         else:
             self.tcp_client.send(to_send.encode('utf-8'))
@@ -68,9 +69,13 @@ class Peer:
         return self.udp_receiver.recvfrom(RECV_SIZE)
 
     def udp_receive(self):
-        """receives a udp message, interprets it, and returns the relevant information, also tcp connects if necessary"""
+        """receives a udp message, interprets it, and returns the relevant information, also tcp connects if
+        necessary"""
         (received_message, sender_address) = self.udp_receive_raw()
         received_message = received_message.decode('utf-8')
+
+        print("udp receive: " + received_message)
+
         if received_message[:len("transaction:")] == "transaction:":
             return Transaction.deserialize(received_message[len("transaction:"):])
 
