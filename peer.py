@@ -39,7 +39,6 @@ class Peer:
     def tcp_client_send(self, to_send):
         """sends a tcp message to a server (a new peer that's asking for missing blocks)"""
         if type(to_send) == Block:
-            print("here")
             self.tcp_client.send(("Block: " + to_send.serialize()).encode('utf-8'))
         else:
             self.tcp_client.send(to_send.encode('utf-8'))
