@@ -27,13 +27,31 @@ class Main(qtw.QMainWindow):
         self.finished_collecting_missing_blocks_by_button = False  # for checking if finished collecting missing blocks
         self.is_validator = False
 
-        self.ui.login_button.clicked.connect(self.login)
-        self.ui.login_create_wallet_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.create_wallet_page))
-        self.ui.login_with_key_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.retrieve_wallet_page))
-        self.ui.create_wallet_button.clicked.connect(self.create_wallet)
+        # navigation buttons
+        self.ui.login_create_wallet_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.create_wallet_page))
+        self.ui.login_with_key_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.retrieve_wallet_page))
         self.ui.back_to_login_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
+        self.ui.retrieve_back_to_login_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
+
+        # functional buttons
+        self.ui.login_button.clicked.connect(self.login)
+        self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
-        self.ui.retrieve_back_to_login_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
+
+    def enter_main_menu(self):
+        self.ui.public_key_label.setText(str(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)))
+        self.ui.balance_label.setText(str(self.wallet.blockchain.get_balance(self.wallet.public_key.export_key
+                                                                             (format=PUBLIC_KEY_FORMAT))))
+        try:
+            self.ui.staked_label.setText(str(self.wallet.blockchain.get_validators_dict()
+                                             [self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
+        except KeyError:
+            self.ui.staked_label.setText('0')
+
+        self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
 
     def login(self):
         password = self.ui.login_password_line.text()
@@ -42,9 +60,10 @@ class Main(qtw.QMainWindow):
                 protected_private_key = protected_private_key_file.read()
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
             self.request_missing_blocks()
-            self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
+            self.enter_main_menu()
         except ValueError as e:
-            qtw.QMessageBox.critical(None, 'Fail', "password doesn't match the protected private key that was provided.")
+            qtw.QMessageBox.critical(None, 'Fail',
+                                     "password doesn't match the protected private key that was provided.")
         except (IndexError, FileNotFoundError) as e:
             qtw.QMessageBox.critical(None, 'Fail', "there is no wallet on this device.")
 
@@ -59,13 +78,15 @@ class Main(qtw.QMainWindow):
             else:
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
                                                                           protection=PRIVATE_KEY_PROTECTION))
-        self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
+        self.enter_main_menu()
         return self.wallet
 
     def create_wallet_with_private_key(self):
         """gets protected private key from user, a  password, and if they match, calls request_missing_blocks"""
         warning_window = qtw.QMessageBox
-        answer = warning_window.warning(None, 'Warning', "creating a new wallet will delete the wallet that is already on this device from it, are you sure you want to creat a new wallet?", warning_window.Yes | warning_window.No)
+        answer = warning_window.warning(None, 'Warning',
+                                        "creating a new wallet will delete the wallet that is already on this device from it, are you sure you want to creat a new wallet?",
+                                        warning_window.Yes | warning_window.No)
         if answer == warning_window.Yes:
             password = self.ui.retrieve_password_line.text()
             protected_secret_key = self.ui.retrieve_protected_key_line.text()
@@ -74,9 +95,10 @@ class Main(qtw.QMainWindow):
                 with open(f"storage\\private key.txt", 'w') as secret_key_file:
                     secret_key_file.write(protected_secret_key)
                 self.request_missing_blocks()
-                self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
+                self.enter_main_menu()
             except ValueError:
-                qtw.QMessageBox.critical(None, 'Fail', "password doesn't match the protected private key that was provided.")
+                qtw.QMessageBox.critical(None, 'Fail',
+                                         "password doesn't match the protected private key that was provided.")
         else:
             warning_window.information(None, '', "a wallet was not recreated.")
 
