@@ -22,6 +22,8 @@ class Main(qtw.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        self.setWindowFlag(qtc.Qt.FramelessWindowHint)
+
         self.wallet = None
         self.peer = Peer()
         self.finished_collecting_missing_blocks_by_button = False  # for checking if finished collecting missing blocks
@@ -53,6 +55,9 @@ class Main(qtw.QMainWindow):
 
         self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
 
+        self.handle_blocks()
+        self.constant_receive()
+
     def login(self):
         password = self.ui.login_password_line.text()
         try:
@@ -79,7 +84,6 @@ class Main(qtw.QMainWindow):
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
                                                                           protection=PRIVATE_KEY_PROTECTION))
         self.enter_main_menu()
-        return self.wallet
 
     def create_wallet_with_private_key(self):
         """gets protected private key from user, a  password, and if they match, calls request_missing_blocks"""
