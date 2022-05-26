@@ -15,10 +15,10 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtCore as qtc
 
 
-class Main:
+class Main(qtw.QMainWindow):
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super(Main, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -27,23 +27,49 @@ class Main:
         self.finished_collecting_missing_blocks_by_button = False  # for checking if finished collecting missing blocks
         self.is_validator = False
 
-    def create_wallet2(self):
-        self.wallet = Wallet()
-        password = "hello"
-        with open(f"storage\\private key 2.txt", 'w') as private_key_file:
-            if password:
-                private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
-                                                                          passphrase=password,
-                                                                          protection=PRIVATE_KEY_PROTECTION))
-            else:
-                private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
-                                                                          protection=PRIVATE_KEY_PROTECTION))
+        # navigation buttons
+        self.ui.login_create_wallet_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.create_wallet_page))
+        self.ui.login_with_key_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.retrieve_wallet_page))
+        self.ui.back_to_login_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
+        self.ui.retrieve_back_to_login_button.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
 
-        return self.wallet
+        # functional buttons
+        self.ui.login_button.clicked.connect(self.login)
+        self.ui.create_wallet_button.clicked.connect(self.create_wallet)
+        self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
+
+    def enter_main_menu(self):
+        self.ui.public_key_label.setText(str(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)))
+        self.ui.balance_label.setText(str(self.wallet.blockchain.get_balance(self.wallet.public_key.export_key
+                                                                             (format=PUBLIC_KEY_FORMAT))))
+        try:
+            self.ui.staked_label.setText(str(self.wallet.blockchain.get_validators_dict()
+                                             [self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
+        except KeyError:
+            self.ui.staked_label.setText('0')
+
+        self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
+
+    def login(self):
+        password = self.ui.login_password_line.text()
+        try:
+            with open("storage\\private key.txt", 'r') as protected_private_key_file:
+                protected_private_key = protected_private_key_file.read()
+                self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
+            self.request_missing_blocks()
+            self.enter_main_menu()
+        except ValueError as e:
+            qtw.QMessageBox.critical(None, 'Fail',
+                                     "password doesn't match the protected private key that was provided.")
+        except (IndexError, FileNotFoundError) as e:
+            qtw.QMessageBox.critical(None, 'Fail', "there is no wallet on this device.")
 
     def create_wallet(self):
         self.wallet = Wallet()
-        password = "ronronron"
+        password = self.ui.create_password_line.text()
         with open(f"storage\\private key.txt", 'w') as private_key_file:
             if password:
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
@@ -52,19 +78,29 @@ class Main:
             else:
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
                                                                           protection=PRIVATE_KEY_PROTECTION))
+        self.enter_main_menu()
         return self.wallet
 
-    def recreate_wallet(self, password):
-        try:
-            with open(f"storage\\private key.txt", 'r') as secret_key_file:
-                protected_secret_key = secret_key_file.read()
+    def create_wallet_with_private_key(self):
+        """gets protected private key from user, a  password, and if they match, calls request_missing_blocks"""
+        warning_window = qtw.QMessageBox
+        answer = warning_window.warning(None, 'Warning',
+                                        "creating a new wallet will delete the wallet that is already on this device from it, are you sure you want to creat a new wallet?",
+                                        warning_window.Yes | warning_window.No)
+        if answer == warning_window.Yes:
+            password = self.ui.retrieve_password_line.text()
+            protected_secret_key = self.ui.retrieve_protected_key_line.text()
+            try:
                 self.wallet = Wallet(ECC.import_key(protected_secret_key, passphrase=password))
-        except ValueError:
-            print("password doesn't match the protected private key that was provided.")
-        except (IndexError, FileNotFoundError) as e:
-            print("there is no wallet on this device.")
-
-        return self.wallet
+                with open(f"storage\\private key.txt", 'w') as secret_key_file:
+                    secret_key_file.write(protected_secret_key)
+                self.request_missing_blocks()
+                self.enter_main_menu()
+            except ValueError:
+                qtw.QMessageBox.critical(None, 'Fail',
+                                         "password doesn't match the protected private key that was provided.")
+        else:
+            warning_window.information(None, '', "a wallet was not recreated.")
 
     # block handling:
     def handle_blocks(self):
@@ -167,6 +203,7 @@ class Main:
         for sock in rlist:
             if sock == self.peer.udp_receiver:
                 received_message = self.peer.udp_receive()
+                print(received_message)
                 self.received_from_udp_socket(received_message)
 
             if sock == self.peer.tcp_client:
@@ -200,6 +237,7 @@ class Main:
     def send_a_missing_block(self, position):
         """sends a block that might be missing for a newly connected peer on tcp"""
         block_to_send = [block for block in self.wallet.blockchain.chain if block.index == position][0]
+
         self.peer.tcp_client_send(block_to_send)
 
     def request_missing_blocks(self):
@@ -338,22 +376,15 @@ class Main:
 
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
-    MainWindow = qtw.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
-
-    # main = Main()
-    # main_wallet = main.recreate_wallet("ronronron")
-    # second_wallet = main.recreate_wallet2("hello")
+    main = Main()
     # main_wallet.create_blockchain_file()
-    # second_wallet.create_blockchain_file()
-    # # main.peer.udp_send(Block())
-    # while 1:
-    #     main.constant_receive()
-    #     time.sleep(0.1)
+    # # second_wallet.create_blockchain_file()
+    # # # main.peer.udp_send(Block())
+    # main.constant_receive()
     # print(main.wallet.blockchain)
+
+    main.show()
+    sys.exit(app.exec_())
 
     # second_wallet.make_transaction_and_add_to_blockchain(STAKE_ADDRESS,
     #                                                    55)
