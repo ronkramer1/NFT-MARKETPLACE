@@ -23,7 +23,6 @@ class Block:
 
     def serialize(self):
         block_dict = dict(self.__dict__)
-        transaction_list = []
         transaction = block_dict["data"]
         block_dict["data"] = transaction.__dict__
         return str(json.dumps(block_dict, indent=4))

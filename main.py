@@ -32,7 +32,7 @@ class Main(qtw.QMainWindow):
         self.ui.login_with_key_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.retrieve_wallet_page))
         self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.back_to_login_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
-        self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key())
+        self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
         self.ui.retrieve_back_to_login_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.login_page))
 
     def login(self):
@@ -43,14 +43,14 @@ class Main(qtw.QMainWindow):
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
             self.request_missing_blocks()
             self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
-        except ValueError:
+        except ValueError as e:
             qtw.QMessageBox.critical(None, 'Fail', "password doesn't match the protected private key that was provided.")
         except (IndexError, FileNotFoundError) as e:
             qtw.QMessageBox.critical(None, 'Fail', "there is no wallet on this device.")
 
     def create_wallet(self):
         self.wallet = Wallet()
-        password = self.ui.login_password_line.text()
+        password = self.ui.create_password_line.text()
         with open(f"storage\\private key.txt", 'w') as private_key_file:
             if password:
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
