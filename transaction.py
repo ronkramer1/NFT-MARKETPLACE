@@ -44,8 +44,10 @@ class Transaction:
                     x = int(receiver_key.pointQ.x)
                     y = int(receiver_key.pointQ.y)
                 except AttributeError:
+                    print("t2")
                     return False
                 if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
+                    print("t3")
                     return False
 
             # is sender valid:
@@ -54,30 +56,32 @@ class Transaction:
                 x = int(sender_key.pointQ.x)
                 y = int(sender_key.pointQ.y)
             except AttributeError:
+                print("t4")
                 return False
             if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
+                print("t5")
                 return False
 
             # check if fee is valid:
-            if float(self.fee) != float(self.amount * FEE_CONSTANT):
-                return False
+            # if float(self.fee) != float(self.amount * FEE_CONSTANT):
+            #     return False
 
             # check if amount is more than 0, or different than zero in case of retrieving stake:
             if (self.receiver != STAKE_ADDRESS and float(self.amount) <= 0) or (self.receiver == STAKE_ADDRESS and float(self.amount) == 0):
                 return False
 
             # check if the amount can be sent by sender:
-            if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
-                return False
+            # if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
+            #     return False
 
             if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators()[self.sender] < -self.amount):
                 return False
 
-            # check if transaction is a duplicate of an existing transaction:
-            for block in blockchain.chain:
-                for transaction in block.data:
-                    if transaction == self:
-                        return False
+            # # check if transaction is a duplicate of an existing transaction:
+            # for block in blockchain.chain:
+            #     transaction = block.data
+            #     if transaction == self:
+            #         return False
 
         print("transaction valid")
         return True

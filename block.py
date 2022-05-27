@@ -26,41 +26,42 @@ class Block:
             # check transactions:
             transaction = self.data
             if not transaction.is_valid(blockchain):
+                print("transaction not valid")
                 return False
 
             # check signature:
-            serialized_data = []
             transaction = self.data
-            serialized_data.append(transaction.serialize())  # serialize data so that it won't be an object, but a string
-            hash_of_block_content = sha256_hash(self.index, self.prev_hash, serialized_data)
+            block_hash = sha256_hash(self.index, self.prev_hash, transaction.serialize())
             verifier = DSS.new(ECC.import_key(self.validator), STANDARD_FOR_SIGNATURES)
             try:
-                verifier.verify(hash_of_block_content, eval(self.signature))
+                verifier.verify(block_hash, eval(self.signature))
             except ValueError:
+                print("block not verified")
                 return False
 
             # check block number:
-            if self.index != blockchain.chain[-1].block_number + 1:
-                return False
+            # if self.index != blockchain.chain[-1].index + 1:
+            #     print("t1")
+            #     return False
 
-            # check if everyone can pay all for all transactions in block:
-            senders = {}
-            transaction = self.data
-
-            sender_balance = blockchain.get_balance(transaction.sender)
-            sum = 0
-
-            if transaction.sender not in senders:
-                senders[transaction.sender] = []
-            senders[transaction.sender].append(transaction)
-
-            for sender, transactions in senders.items():
-                senders_balance = blockchain.get_balance(sender)
-                total_amount = 0
-                for transaction in transactions:
-                    total_amount += (transaction.amount + transaction.fee)
-                if total_amount > senders_balance:
-                    return False
+            # # check if everyone can pay all for all transactions in block:
+            # senders = {}
+            # transaction = self.data
+            #
+            # sender_balance = blockchain.get_balance(transaction.sender)
+            # sum = 0
+            #
+            # if transaction.sender not in senders:
+            #     senders[transaction.sender] = []
+            # senders[transaction.sender].append(transaction)
+            #
+            # for sender, transactions in senders.items():
+            #     senders_balance = blockchain.get_balance(sender)
+            #     total_amount = 0
+            #     for transaction in transactions:
+            #         total_amount += (transaction.amount + transaction.fee)
+            #     if total_amount > senders_balance:
+            #         return False
 
         print("block valid")
         return True
