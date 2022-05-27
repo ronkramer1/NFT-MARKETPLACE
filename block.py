@@ -21,7 +21,7 @@ class Block:
         self.signature = signature
 
     def is_valid(self, blockchain):
-        """returns true iff the block is valid"""
+        """returns true if the block is valid"""
         if self != Block():  # allow the genesis block
             # check transactions:
             transaction = self.data
@@ -45,10 +45,14 @@ class Block:
 
             # check if everyone can pay all for all transactions in block:
             senders = {}
-            for transaction in self.data:
-                if transaction.sender not in senders:
-                    senders[transaction.sender] = []
-                senders[transaction.sender].append(transaction)
+            transaction = self.data
+
+            sender_balance = blockchain.get_balance(transaction.sender)
+            sum = 0
+
+            if transaction.sender not in senders:
+                senders[transaction.sender] = []
+            senders[transaction.sender].append(transaction)
 
             for sender, transactions in senders.items():
                 senders_balance = blockchain.get_balance(sender)
@@ -58,6 +62,7 @@ class Block:
                 if total_amount > senders_balance:
                     return False
 
+        print("block valid")
         return True
 
     def generate_hash(self):
