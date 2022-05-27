@@ -17,11 +17,13 @@ class Transaction:
 
     def is_valid(self, blockchain):
         """returns true if the transaction is valid"""
-        if not (self.serialize() == Transaction().serialize() and self in blockchain.chain[
-            0].data):  # unless initial transaction for initial coin offering
+        if not (self.serialize() == Transaction().serialize() and self in blockchain.chain[0].data):  # unless initial transaction for initial coin offering
             # check signature against sender and rest of transaction:
             hash_of_transaction = self.generate_hash()
-            if not verify(hash_of_transaction, self.signature):
+            verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
+            try:
+                verifier.verify(hash_of_transaction, eval(self.signature))
+            except ValueError:
                 return False
 
             # check if the receiver and sender are valid (if it's a point on the elliptic curve):
@@ -32,11 +34,6 @@ class Transaction:
                     x = int(receiver_key.pointQ.x)
                     y = int(receiver_key.pointQ.y)
                 except AttributeError:
-                    return False
-                if (y ** 2) != (x ** 3) + (a * x) + b:
-                    print((y ** 2))
-                    print((x ** 3) + (a * x) + b)
-                    print("fell here")
                     return False
                 if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
                     return False
@@ -56,16 +53,14 @@ class Transaction:
                 return False
 
             # check if amount is more than 0, or different than zero in case of retrieving stake:
-            if (self.receiver != STAKE_ADDRESS and float(self.amount) <= 0) or (
-                    self.receiver == STAKE_ADDRESS and float(self.amount) == 0):
+            if (self.receiver != STAKE_ADDRESS and float(self.amount) <= 0) or (self.receiver == STAKE_ADDRESS and float(self.amount) == 0):
                 return False
 
             # check if the amount can be sent by sender:
             if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
                 return False
 
-            if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (
-                    blockchain.get_validators()[self.sender] < -self.amount):
+            if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators()[self.sender] < -self.amount):
                 return False
 
             # check if transaction is a duplicate of an existing transaction:
@@ -76,6 +71,71 @@ class Transaction:
 
         print("transaction valid")
         return True
+
+    # def is_valid(self, blockchain):
+    #     """returns true if the transaction is valid"""
+    #     if not (self.serialize() == Transaction().serialize() and self in blockchain.chain[
+    #         0].data):  # unless initial transaction for initial coin offering
+    #         # check signature against sender and rest of transaction:
+    #         hash_of_transaction = self.generate_hash()
+    #         verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
+    #         try:
+    #             verifier.verify(hash_of_transaction, self.signature.encode())
+    #         except ValueError:
+    #             return False
+    #
+    #         # check if the receiver and sender are valid (if it's a point on the elliptic curve):
+    #         # is receiver valid:
+    #         if self.receiver != STAKE_ADDRESS:
+    #             receiver_key = ECC.import_key(self.receiver)
+    #             try:
+    #                 x = int(receiver_key.pointQ.x)
+    #                 y = int(receiver_key.pointQ.y)
+    #             except AttributeError:
+    #                 return False
+    #             if (y ** 2) != (x ** 3) + (a * x) + b:
+    #                 print((y ** 2))
+    #                 print((x ** 3) + (a * x) + b)
+    #                 print("fell here")
+    #                 return False
+    #             if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
+    #                 return False
+    #
+    #         # is sender valid:
+    #         sender_key = ECC.import_key(self.sender)
+    #         try:
+    #             x = int(sender_key.pointQ.x)
+    #             y = int(sender_key.pointQ.y)
+    #         except AttributeError:
+    #             return False
+    #         if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
+    #             return False
+    #
+    #         # check if fee is valid:
+    #         if float(self.fee) != float(self.amount * FEE_CONSTANT / 100):
+    #             return False
+    #
+    #         # check if amount is more than 0, or different than zero in case of retrieving stake:
+    #         if (self.receiver != STAKE_ADDRESS and float(self.amount) <= 0) or (
+    #                 self.receiver == STAKE_ADDRESS and float(self.amount) == 0):
+    #             return False
+    #
+    #         # check if the amount can be sent by sender:
+    #         if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
+    #             return False
+    #
+    #         if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (
+    #                 blockchain.get_validators()[self.sender] < -self.amount):
+    #             return False
+    #
+    #         # check if transaction is a duplicate of an existing transaction:
+    #         for block in blockchain.chain:
+    #             for transaction in block.data:
+    #                 if transaction == self:
+    #                     return False
+    #
+    #     print("transaction valid")
+    #     return True
 
     def generate_hash(self):
         """returns a hash of the sender, receiver, amount, and fee"""
