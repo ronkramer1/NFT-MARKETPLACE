@@ -18,9 +18,9 @@ try:
     PRIVATE_KEY_PROTECTION = config['cryptography']['PRIVATE_KEY_PROTECTION']
     STANDARD_FOR_SIGNATURES = config['cryptography']['STANDARD_FOR_SIGNATURES']
 
-    a = config['fips-186-3 constants']['a']
-    b = config['fips-186-3 constants']['b']
-    p = config['fips-186-3 constants']['p']
+    a = int(config['fips-186-3 constants']['a'])
+    b = int(config['fips-186-3 constants']['b'])
+    p = int(config['fips-186-3 constants']['p'])
 
     STAKE_ADDRESS = config['cryptography']['STAKE_ADDRESS']
 

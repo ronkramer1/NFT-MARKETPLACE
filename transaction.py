@@ -22,7 +22,7 @@ class Transaction:
             hash_of_transaction = self.generate_hash()
             verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
             try:
-                verifier.verify(hash_of_transaction, eval(self.signature))
+                verifier.verify(hash_of_transaction, self.signature.encode())
             except ValueError:
                 return False
 
