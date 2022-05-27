@@ -39,9 +39,19 @@ class Wallet:
     def make_transaction(self, receiver, amount, nft=None):
         sender = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
         fee = amount * FEE_CONSTANT
+        print("------")
+        print(nft)
+        print(sender)
+        print(receiver)
+        print(amount)
+        print(fee)
+        print("------make transaction")
+
         transaction_hash = sha256_hash(nft, sender, receiver, amount, fee)
         signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
         signature = str(signer.sign(transaction_hash))
+        print("original " + signature)
+        print("hash " + str(transaction_hash.digest()))
         transaction = Transaction(nft, receiver, sender, amount, signature)
         self.transaction_pool.append(transaction)
 
