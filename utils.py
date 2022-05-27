@@ -61,20 +61,25 @@ def sha256_hash(*args):
 def most_frequent(lst):
     """takes a list and returns the most frequent element in it"""
     counter = 0
-    num = lst[0]
-
+    if lst:
+        most_freq = lst[0]
+    else:
+        return
     for i in lst:
         curr_frequency = lst.count(i)
         if curr_frequency > counter:
             counter = curr_frequency
-            num = i
+            most_freq = i
 
-    return num
+    return most_freq
 
 
 def verify(self, hash_value, signature):
     verifier = DSS.new(self.public_key, STANDARD_FOR_SIGNATURES)
-    return verifier.verify(hash_value, signature)
+    try:
+        return verifier.verify(hash_value, bytes(signature))
+    except ValueError:
+        return False
 
 
 def password_check(password):

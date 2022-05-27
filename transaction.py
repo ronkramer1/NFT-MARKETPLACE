@@ -21,10 +21,7 @@ class Transaction:
             0].data):  # unless initial transaction for initial coin offering
             # check signature against sender and rest of transaction:
             hash_of_transaction = self.generate_hash()
-            verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
-            try:
-                verifier.verify(hash_of_transaction, eval(self.signature))
-            except ValueError:
+            if not verify(hash_of_transaction, self.signature):
                 return False
 
             # check if the receiver and sender are valid (if it's a point on the elliptic curve):
@@ -39,6 +36,7 @@ class Transaction:
                 if (y ** 2) != (x ** 3) + (a * x) + b:
                     print((y ** 2))
                     print((x ** 3) + (a * x) + b)
+                    print("fell here")
                     return False
                 if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
                     return False
@@ -76,6 +74,7 @@ class Transaction:
                     if transaction == self:
                         return False
 
+        print("transaction valid")
         return True
 
     def generate_hash(self):
