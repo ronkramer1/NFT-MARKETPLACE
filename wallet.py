@@ -58,7 +58,9 @@ class Wallet:
     def create_block(self):
         if len(self.transaction_pool) >= NUM_OF_TRANSACTIONS_IN_BLOCK:
             block = self.blockchain.create_block(self.transaction_pool[-1])
-            signature = self.sign_block(block)
+            block_hash = sha256_hash(block.index, block.prev_hash, block.data.serialize())
+            signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
+            signature = str(signer.sign(block_hash))
             block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
             block.signature = signature
             self.transaction_pool = []

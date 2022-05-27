@@ -362,25 +362,25 @@ class Main(qtw.QMainWindow):
 
 
 if __name__ == "__main__":
-    # wallet = Wallet()
-    # second_wallet = Wallet()
-    # wallet.create_blockchain_file()
-    # wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT), 100)
-    # is_valid = wallet.blockchain.chain[2].is_valid(wallet.blockchain)
-    # print(is_valid)
+    wallet = Wallet()
+    second_wallet = Wallet()
+    wallet.create_blockchain_file()
+    wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT), 100)
+    is_valid = wallet.blockchain.chain[2].is_valid(wallet.blockchain)
+    print(is_valid)
 
-    # for handling exceptions:
-    sys._excepthook = sys.excepthook
-
-
-    def exception_hook(exctype, value, traceback):
-        print(traceback)
-        sys._excepthook(exctype, value, traceback)
-        sys.exit(1)
-
-    sys.excepthook = exception_hook
-
-    app = qtw.QApplication(sys.argv)
-    main = Main()
-    main.show()
-    sys.exit(app.exec_())
+    # # for handling exceptions:
+    # sys._excepthook = sys.excepthook
+    #
+    #
+    # def exception_hook(exctype, value, traceback):
+    #     print(traceback)
+    #     sys._excepthook(exctype, value, traceback)
+    #     sys.exit(1)
+    #
+    # sys.excepthook = exception_hook
+    #
+    # app = qtw.QApplication(sys.argv)
+    # main = Main()
+    # main.show()
+    # sys.exit(app.exec_())
