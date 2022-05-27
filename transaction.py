@@ -86,7 +86,6 @@ class Transaction:
                 "signature": self.signature,
                 "fee": self.fee
             }
-        print(transaction_dict)
         return str(json.dumps(transaction_dict, indent=4))
 
     @staticmethod
