@@ -24,9 +24,9 @@ class Block:
         """returns true iff the block is valid"""
         if self != Block():  # allow the genesis block
             # check transactions:
-            for transaction in self.data:
-                if not transaction.is_valid(blockchain):
-                    return False
+            transaction = self.data
+            if not transaction.is_valid(blockchain):
+                return False
 
             # check signature:
             serialized_data = []

@@ -83,11 +83,17 @@ class Transaction:
         return sha256_hash(self.nft, self.sender, self.receiver, self.amount, self.fee)
 
     def serialize(self):
-        transaction_dict = json.dumps(self.__dict__, indent=4)
+        transaction_dict = self.__dict__
+        if not transaction_dict["nft"]:
+            transaction_dict = {
+                "receiver": self.receiver,
+                "sender": self.sender,
+                "amount": self.amount,
+                "signature": self.signature,
+                "fee": self.fee
+            }
         print(transaction_dict)
-        for value in transaction_dict:
-            print(value)
-        return str(transaction_dict)
+        return str(json.dumps(transaction_dict, indent=4))
 
     @staticmethod
     def deserialize(data):
