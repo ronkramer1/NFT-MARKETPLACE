@@ -7,7 +7,7 @@ from utils import *
 
 
 class Transaction:
-    def __init__(self, nft=None, receiver=STAKE_ADDRESS, sender="", amount=NUMBER_OF_COINS, signature=""):
+    def __init__(self, nft=None, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature=""):
         self.nft = nft
         self.receiver = receiver
         self.sender = sender

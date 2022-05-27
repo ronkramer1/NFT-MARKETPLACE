@@ -44,6 +44,8 @@ class Main(qtw.QMainWindow):
         self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
         self.ui.browse_button.clicked.connect(self.browse_data)
+        self.ui.stop_waiting_button.clicked.connect(self.stop_waiting_for_blocks)
+        self.ui.send_kcn_button.clicked.connect(self.send_transaction)
 
     def browse_data(self):
         data_path = qtw.QFileDialog.getOpenFileName(self, 'Open File', "", '*.jpg', )
@@ -79,8 +81,11 @@ class Main(qtw.QMainWindow):
                 protected_private_key = protected_private_key_file.read()
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
                 self.wallet.create_blockchain_file()
+
+            self.ui.stackedWidget.setCurrentWidget(self.ui.waiting_page)
             self.request_missing_blocks()
-            self.enter_main_menu()
+            # self.enter_main_menu()
+
         except ValueError as e:
             qtw.QMessageBox.critical(None, 'Fail',
                                      "password doesn't match the protected private key that was provided.")
@@ -161,7 +166,7 @@ class Main(qtw.QMainWindow):
     # networking:
     def send_transaction(self):
         """sends a transaction, the data for the transaction is provided by the user"""
-        password = self.ui.transaction_password_in.text()
+        password = self.ui.send_kcn_password_line.text()
         with open(f"storage\\private key.txt", 'r') as secret_key_file:
             protected_secret_key = secret_key_file.read()
             try:
@@ -171,35 +176,36 @@ class Main(qtw.QMainWindow):
                                          "password doesn't match the protected private key that was provided.")
                 return
 
-            selected_contacts = self.ui.contacts_list.selectedItems()
-            if not selected_contacts:
-                qtw.QMessageBox.critical(None, 'Fail', "no contact was selected.")
+            receiver = self.ui.send_to_line.text()
+            # selected_contacts = self.ui.contacts_list.selectedItems()
+            # if not selected_contacts:
+            #     qtw.QMessageBox.critical(None, 'Fail', "no contact was selected.")
+            #     return
+
+            # for receiver in selected_contacts:
+            #     try:
+            #         receiver = receiver.text().split(": ")[-1]
+            #     except AttributeError:
+            #         qtw.QMessageBox.critical(None, 'Fail', "no contact selected.")
+            #         return
+
+            try:
+                amount = float(self.ui.amount_line.text())
+            except ValueError:
+                qtw.QMessageBox.critical(None, 'Fail', "amount must be a number.")
                 return
 
-            for receiver in selected_contacts:
-                try:
-                    receiver = receiver.text().split(": ")[-1]
-                except AttributeError:
-                    qtw.QMessageBox.critical(None, 'Fail', "no contact selected.")
-                    return
-
-                try:
-                    amount = float(self.ui.amount_text_incer.text())
-                except ValueError:
-                    qtw.QMessageBox.critical(None, 'Fail', "amount must be a number.")
-                    return
-
-                if (amount > 0) or (receiver == STAKE_ADDRESS and amount != 0):
-                    transaction = self.wallet.make_transaction(receiver, amount)
-                    if transaction:
-                        self.peer.udp_send(transaction)
-                        qtw.QMessageBox.information(None, 'Success', "successfully sent the transaction.")
-                    else:
-                        qtw.QMessageBox.critical(None, 'Fail',
-                                                 "you don't have enough coins to complete this transaction.")
+            if (amount > 0) or (receiver == STAKE_ADDRESS and amount != 0):
+                transaction = self.wallet.make_transaction(receiver, amount)
+                if transaction:
+                    self.peer.udp_send(transaction)
+                    qtw.QMessageBox.information(None, 'Success', "successfully sent the transaction.")
                 else:
                     qtw.QMessageBox.critical(None, 'Fail',
-                                             "amount must be more than zero when not retrieving coins from stake, or different to zero when retrieving or staking coins.")
+                                             "you don't have enough coins to complete this transaction.")
+            else:
+                qtw.QMessageBox.critical(None, 'Fail',
+                                         "amount must be more than zero when not retrieving coins from stake, or different to zero when retrieving or staking coins.")
 
     def recreate_wallet2(self, password):
         try:
@@ -222,13 +228,11 @@ class Main(qtw.QMainWindow):
         for sock in rlist:
             if sock == self.peer.udp_receiver:
                 received_message = self.peer.udp_receive()
-                print(received_message)
                 self.received_from_udp_socket(received_message)
 
             if sock == self.peer.tcp_client:
                 try:
                     received_message = sock.recv(RECV_SIZE).decode()
-                    print("received tcp: " + str(received_message))
                 except ConnectionResetError:
                     received_message = ''
                 if received_message[:len("position ")] == "position ":
@@ -251,7 +255,7 @@ class Main(qtw.QMainWindow):
         elif type(message) == str and message[:len("connected")] == "connected":
             self.send_a_missing_block(self.wallet.blockchain.chain[-1].index)
         else:
-            print(message)
+            print("received: " + str(message))
 
     def send_a_missing_block(self, position):
         """sends a block that might be missing for a newly connected peer on tcp"""
@@ -265,9 +269,10 @@ class Main(qtw.QMainWindow):
 
     def update_blockchain_file(self):
         """updates the blockchain file with data from wallet"""
+        print("tries to update")
         with open(f"storage\\blockchain.json", "w") as blockchain_file:
             blockchain_file.write(self.wallet.blockchain.serialize())
-        self.ui.label.setText(str(self.wallet.get_balance()))
+        self.ui.balance_label.setText(str(self.wallet.get_balance()))
         try:
             self.ui.staked_label.setText(str(
                 self.wallet.blockchain.get_validators_dict()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))

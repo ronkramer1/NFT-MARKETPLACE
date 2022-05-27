@@ -25,7 +25,7 @@ try:
     STAKE_ADDRESS = config['cryptography']['STAKE_ADDRESS']
 
     NUMBER_OF_COINS = float(config['ICH']['NUMBER_OF_COINS'])
-    INITIAL_COIN_HOLDER = config['ICH']['INITIAL_COIN_HOLDER']
+    INITIAL_COIN_HOLDER = str(config['ICH']['INITIAL_COIN_HOLDER'])
 
     RECV_SIZE = eval(config['networking']['RECV_SIZE'])
     UDP_PORT = int(config['networking']['UDP_PORT'])
@@ -48,6 +48,12 @@ except configparser.ParsingError:
     UDP_PORT = 50000
     TCP_PORT = 50001
     NUMBER_OF_CONNECTED_CLIENTS = 1
+
+    NUMBER_OF_COINS = 10000.0
+    INITIAL_COIN_HOLDER = '''-----BEGIN PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEofGBl+ldHaybl1JKCfJarla9uEWk
+    fwRHMMp1H5yHbcj1GivtKBSRcNVoOMZg18guZquf50pNH2WAtnWz4vVWJQ==
+    -----END PUBLIC KEY-----'''
 
 
 def sha256_hash(*args):

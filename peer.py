@@ -74,8 +74,6 @@ class Peer:
         (received_message, sender_address) = self.udp_receive_raw()
         received_message = received_message.decode('utf-8')
 
-        print("udp receive: " + received_message)
-
         if received_message[:len("NFT")] == "NFT":
             return NFT.deserialize(received_message[len("NFT"):])
 
