@@ -166,6 +166,13 @@ class Main(qtw.QMainWindow):
     # networking:
     def send_transaction(self):
         """sends a transaction, the data for the transaction is provided by the user"""
+        public_key = self.ui.send_to_line.text()
+        if public_key != STAKE_ADDRESS:
+            try:
+                ECC.import_key(public_key)
+            except (ValueError, IndexError):
+                qtw.QMessageBox.critical(None, 'Fail', "public key is incorrect")
+                return
         password = self.ui.send_kcn_password_line.text()
         with open(f"storage\\private key.txt", 'r') as secret_key_file:
             protected_secret_key = secret_key_file.read()
@@ -354,7 +361,7 @@ class Main(qtw.QMainWindow):
                 valid_collected_blocks_list_tuples = []
                 for valid_collected_block in valid_collected_blocks_lists:
                     valid_collected_blocks_list_tuples.append(
-                        (valid_collected_block.index, valid_collected_block.generate_hash()))
+                        (valid_collected_block.index, valid_collected_block.generate_hash))
                 valid_collected_blocks_lists_list_tuples.append(valid_collected_blocks_list_tuples)
 
             correct_valid_collected_blocks_list_tuples = most_frequent(valid_collected_blocks_lists_list_tuples)

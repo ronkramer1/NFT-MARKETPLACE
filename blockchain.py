@@ -12,7 +12,7 @@ class Blockchain:
 
     def create_block(self, data=None):
         index = self.chain[-1].index + 1
-        prev_hash = self.chain[-1].generate_hash()
+        prev_hash = self.chain[-1].generate_hash().hexdigest()
         block = Block(index, prev_hash, data)
         self.chain.append(block)
         return block
@@ -60,6 +60,7 @@ class Blockchain:
             block_dict["data"] = transaction.__dict__
             block_list.append(block_dict)
         blockchain_dict["chain"] = block_list
+        print(blockchain_dict)
         return str(json.dumps(blockchain_dict, indent=4))
 
     @staticmethod
