@@ -17,6 +17,11 @@ try:
     PRIVATE_KEY_FORMAT = config['cryptography']['PRIVATE_KEY_FORMAT']
     PRIVATE_KEY_PROTECTION = config['cryptography']['PRIVATE_KEY_PROTECTION']
     STANDARD_FOR_SIGNATURES = config['cryptography']['STANDARD_FOR_SIGNATURES']
+
+    a = config['fips-186-3 constants']['a']
+    b = config['fips-186-3 constants']['b']
+    p = config['fips-186-3 constants']['p']
+
     STAKE_ADDRESS = config['cryptography']['STAKE_ADDRESS']
 
     NUMBER_OF_COINS = float(config['ICH']['NUMBER_OF_COINS'])
@@ -33,6 +38,10 @@ except configparser.ParsingError:
 
     CURVE = 'P-256'
     CURVE_FORMAT = 'PEM'
+
+    a = -3
+    b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+    p = 115792089210356248762697446949407573530086143415290314195533631308867097853951
 
     RECV_SIZE = 1024 * 10
     UDP_PORT = 50000
