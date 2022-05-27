@@ -360,7 +360,12 @@ class Main(qtw.QMainWindow):
             with open(f"storage\\blockchain.json", "w") as blockchain_file:
                 pass
 
+
 if __name__ == "__main__":
+    # wallet = Wallet()
+    # second_wallet = Wallet()
+    # wallet.create_blockchain_file()
+    # wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT), 100)
     # for handling exceptions:
     sys._excepthook = sys.excepthook
 

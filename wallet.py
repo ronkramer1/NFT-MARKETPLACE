@@ -22,24 +22,33 @@ class Wallet:
         self.transaction_pool = []
         self.proposed_blocks = []
 
-    def sign_transaction(self, receiver, amount):
+    def sign_transaction(self, receiver, amount, nft=None):
         sender = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
         fee = amount * FEE_CONSTANT
-        transaction_hash = sha256_hash(sender, receiver, amount, fee)
+        transaction_hash = sha256_hash(nft, sender, receiver, amount, fee)
         signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
-        signature = signer.sign(transaction_hash)
+        signature = str(signer.sign(transaction_hash))
         return signature
 
-    def make_transaction(self, receiver, amount):
-        transaction = Transaction(str(receiver), str(self.public_key.export_key(format=PUBLIC_KEY_FORMAT)), amount,
-                                  str(self.sign_transaction(receiver, amount)))
-        self.transaction_pool.append(transaction)
-
     def sign_block(self, block):
-        block_hash = sha256_hash(block.index, block.prev_hash, block.data)
+        block_hash = sha256_hash(block.index, block.prev_hash, block.data.serialize())
         signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
         signature = str(signer.sign(block_hash))
         return signature
+
+    def make_transaction(self, receiver, amount):
+        transaction = Transaction(None, receiver, self.public_key.export_key(format=PUBLIC_KEY_FORMAT), amount,
+                                  self.sign_transaction(receiver, amount), amount * FEE_CONSTANT)
+        self.transaction_pool.append(transaction)
+
+    def create_block(self):
+        if len(self.transaction_pool) >= NUM_OF_TRANSACTIONS_IN_BLOCK:
+            block = self.blockchain.create_block(self.transaction_pool[-1])
+            signature = self.sign_block(block)
+            block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
+            block.signature = signature
+            self.transaction_pool = []
+            return block
 
     def choose_validator(self):
         validators = self.blockchain.get_validators_dict()
@@ -61,15 +70,6 @@ class Wallet:
     def add_proposed_block(self, block):
         """adds a block the the proposed blocks list"""
         self.proposed_blocks.append(block)
-
-    def create_block(self):
-        if len(self.transaction_pool) >= NUM_OF_TRANSACTIONS_IN_BLOCK:
-            block = self.blockchain.create_block(self.transaction_pool[-1])
-            signature = self.sign_block(block)
-            block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
-            block.signature = signature
-            self.transaction_pool = []
-            return block
 
     def add_a_block_to_chain(self):
         """adds a block from the proposed blocks to the blockchain iff the block is valid and its validator is the current leader, also empties the transaction pool and the proposed blocks list"""
@@ -113,13 +113,3 @@ class Wallet:
         return f"secret_key: {self.private_key}\n" \
                + f"public_key: {self.public_key}\n" \
                + f"blockchain: {self.blockchain}\n"
-
-
-if __name__ == "__main__":
-    # wallet = Wallet()
-    # wallet.create_blockchain_file()
-    chain = Blockchain()
-    for i in range(3):
-        chain.create_block(Transaction())
-    wallet = Wallet(chain)
-    wallet.create_blockchain_file()
