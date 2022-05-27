@@ -67,8 +67,7 @@ class Block:
         return True
 
     def generate_hash(self):
-        return sha256_hash(self.index, self.data, self.timestamp, self.prev_hash, self.validator, self.signature).\
-            hexdigest()
+        return sha256_hash(self.index, self.data, self.timestamp, self.prev_hash, self.validator, self.signature)
 
     def serialize(self):
         block_dict = dict(self.__dict__)

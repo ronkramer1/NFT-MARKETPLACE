@@ -269,20 +269,21 @@ class Main(qtw.QMainWindow):
             blockchain_file.write(self.wallet.blockchain.serialize())
         self.ui.label.setText(str(self.wallet.get_balance()))
         try:
-            self.ui.staked_label.setText(str(self.wallet.blockchain.get_validators()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
+            self.ui.staked_label.setText(str(
+                self.wallet.blockchain.get_validators()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
         except KeyError:
             self.ui.staked_label.setText('0')
 
     def collect_blocks(self):
         """collects blocks that might be missing from other peers"""
-        missing_blocks_by_peer = {}
+        peers_and_missing_blocks_dict = {}
         self.peer.request_update_connection()
-        finished_so_far = 0
+        finished_collecting_peers = 0
         tcp_connected_peers = []
         finished_collecting_missing_blocks = False
 
         def collect_blocks_networking():
-            nonlocal finished_so_far
+            nonlocal finished_collecting_peers
             nonlocal tcp_connected_peers
             nonlocal finished_collecting_missing_blocks
 
@@ -300,15 +301,15 @@ class Main(qtw.QMainWindow):
                         received_message = received_message[len("Block: "):]
                         received_block = Block.deserialize(received_message)
                         if received_block.index not in [block.index for block in
-                                                               self.wallet.blockchain.chain]:  # if block number isn't alewady in chain
-                            if sock not in missing_blocks_by_peer:
-                                missing_blocks_by_peer[sock] = []
-                            missing_blocks_by_peer[sock].append(received_block)
-                            sock.send(f"position {received_block.index - 1}".encode('utf-8'))
+                                                        self.wallet.blockchain.chain]:  # if block number isn't already in chain
+                            if sock not in peers_and_missing_blocks_dict:
+                                peers_and_missing_blocks_dict[sock] = []
+                            peers_and_missing_blocks_dict[sock].append(received_block)
+                            sock.send(f"position {received_block.index - 1}".encode())
                         else:
-                            sock.send("finished".encode('utf-8'))
-                            finished_so_far += 1
-                            if finished_so_far >= NUMBER_OF_CONNECTED_CLIENTS:
+                            sock.send("finished".encode())
+                            finished_collecting_peers += 1
+                            if finished_collecting_peers >= NUMBER_OF_CONNECTED_CLIENTS:
                                 finished_collecting_missing_blocks = True
 
                     elif received_message == '':
@@ -323,7 +324,7 @@ class Main(qtw.QMainWindow):
                 tcp_connected_peers = []
                 self.peer.close_server()
                 if finished_collecting_missing_blocks:
-                    self.handle_collected_blocks(list(missing_blocks_by_peer.values()))
+                    self.handle_collected_blocks(list(peers_and_missing_blocks_dict.values()))
                 self.enter_main_menu()
 
         collect_blocks_networking()
@@ -345,12 +346,15 @@ class Main(qtw.QMainWindow):
             for valid_collected_blocks_lists in valid_collected_blocks_lists_list:
                 valid_collected_blocks_list_tuples = []
                 for valid_collected_block in valid_collected_blocks_lists:
-                    valid_collected_blocks_list_tuples.append((valid_collected_block.block_number, valid_collected_block.hash_block))
+                    valid_collected_blocks_list_tuples.append(
+                        (valid_collected_block.index, valid_collected_block.generate_hash()))
                 valid_collected_blocks_lists_list_tuples.append(valid_collected_blocks_list_tuples)
 
             correct_valid_collected_blocks_list_tuples = most_frequent(valid_collected_blocks_lists_list_tuples)
-            index_of_correct_valid_collected_blocks_list = valid_collected_blocks_lists_list_tuples.index(correct_valid_collected_blocks_list_tuples)
-            correct_valid_collected_blocks_list = valid_collected_blocks_lists_list[index_of_correct_valid_collected_blocks_list]
+            index_of_correct_valid_collected_blocks_list = valid_collected_blocks_lists_list_tuples.index(
+                correct_valid_collected_blocks_list_tuples)
+            correct_valid_collected_blocks_list = valid_collected_blocks_lists_list[
+                index_of_correct_valid_collected_blocks_list]
 
             for correct_valid_collected_block in correct_valid_collected_blocks_list:
                 self.wallet.add_proposed_block(correct_valid_collected_block)
@@ -362,25 +366,26 @@ class Main(qtw.QMainWindow):
 
 
 if __name__ == "__main__":
-    wallet = Wallet()
-    second_wallet = Wallet()
-    wallet.create_blockchain_file()
-    wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT), 100)
-    is_valid = wallet.blockchain.chain[2].is_valid(wallet.blockchain)
-    print(is_valid)
+    # wallet = Wallet()
+    # second_wallet = Wallet()
+    # wallet.create_blockchain_file()
+    # wallet.make_transaction_and_add_to_blockchain(second_wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT), 100)
+    # is_valid = wallet.blockchain.chain[2].is_valid(wallet.blockchain)
+    # print(is_valid)
 
-    # # for handling exceptions:
-    # sys._excepthook = sys.excepthook
-    #
-    #
-    # def exception_hook(exctype, value, traceback):
-    #     print(traceback)
-    #     sys._excepthook(exctype, value, traceback)
-    #     sys.exit(1)
-    #
-    # sys.excepthook = exception_hook
-    #
-    # app = qtw.QApplication(sys.argv)
-    # main = Main()
-    # main.show()
-    # sys.exit(app.exec_())
+    # for handling exceptions:
+    sys._excepthook = sys.excepthook
+
+
+    def exception_hook(exctype, value, traceback):
+        print(traceback)
+        sys._excepthook(exctype, value, traceback)
+        sys.exit(1)
+
+
+    sys.excepthook = exception_hook
+
+    app = qtw.QApplication(sys.argv)
+    main = Main()
+    main.show()
+    sys.exit(app.exec_())
