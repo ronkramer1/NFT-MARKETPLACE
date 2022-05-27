@@ -19,21 +19,12 @@ class Transaction:
         """returns true if the transaction is valid"""
         if not (self.serialize() == Transaction().serialize() and self in blockchain.chain[0].data):  # unless initial transaction for initial coin offering
             # check signature against sender and rest of transaction:
-            print("-------")
-            print(self.nft)
-            print(self.sender)
-            print(self.receiver)
-            print(self.amount)
-            print(self.fee)
-            print("-------")
 
             hash_of_transaction = sha256_hash(self.nft, self.sender, self.receiver, self.amount, self.fee)
-            print(hash_of_transaction.digest())
             verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
             try:
                 verifier.verify(hash_of_transaction, eval(self.signature))
             except ValueError:
-                print("t1")
                 return False
 
             # check if the receiver and sender are valid (if it's a point on the elliptic curve):
@@ -44,10 +35,8 @@ class Transaction:
                     x = int(receiver_key.pointQ.x)
                     y = int(receiver_key.pointQ.y)
                 except AttributeError:
-                    print("t2")
                     return False
                 if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
-                    print("t3")
                     return False
 
             # is sender valid:
@@ -56,10 +45,8 @@ class Transaction:
                 x = int(sender_key.pointQ.x)
                 y = int(sender_key.pointQ.y)
             except AttributeError:
-                print("t4")
                 return False
             if ((y ** 2) - ((x ** 3) - (a * x) + b)) % p == 0:
-                print("t5")
                 return False
 
             # check if fee is valid:
@@ -83,7 +70,6 @@ class Transaction:
             #     if transaction == self:
             #         return False
 
-        print("transaction valid")
         return True
 
     def generate_hash(self):
@@ -107,7 +93,6 @@ class Transaction:
         data_dict = {}
         if type(data) == str:
             data_dict = json.loads(data)
-            print(data_dict)
         elif type(data) == dict:
             data_dict = data
 

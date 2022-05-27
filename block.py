@@ -26,7 +26,6 @@ class Block:
             # check transactions:
             transaction = self.data
             if not transaction.is_valid(blockchain):
-                print("transaction not valid")
                 return False
 
             # check signature:
@@ -36,7 +35,6 @@ class Block:
             try:
                 verifier.verify(block_hash, eval(self.signature))
             except ValueError:
-                print("block not verified")
                 return False
 
             # check block number:
@@ -63,7 +61,6 @@ class Block:
             #     if total_amount > senders_balance:
             #         return False
 
-        print("block valid")
         return True
 
     def generate_hash(self):
@@ -97,12 +94,3 @@ class Block:
                + f"prev_hash: {self.prev_hash}\n" \
                + f"validator: {self.validator}\n" \
                + f"signature: {self.signature}\n"
-
-
-def main():
-    block = Block()
-    print(block.serialize())
-
-
-if __name__ == "__main__":
-    main()
