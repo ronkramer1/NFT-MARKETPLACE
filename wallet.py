@@ -44,8 +44,15 @@ class Wallet:
             signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
             signature = str(signer.sign(transaction_hash))
             transaction = Transaction(nft, receiver, sender, amount, signature)
-            # self.transaction_pool.append(transaction)
             return transaction
+
+        return False
+
+    def add_transaction_to_pool(self, transaction):
+        """adds a transaction to the transaction pool if it's valid"""
+        if transaction.is_valid(self.blockchain):
+            self.transaction_pool.append(transaction)
+            return True
 
         return False
 

@@ -247,7 +247,9 @@ class Main(qtw.QMainWindow):
         """handles a message that was received by the udp receiver socket"""
         if type(message) == Transaction:
             if self.wallet.add_transaction_to_pool(message):
-                pass
+                print("added")
+            else:
+                print("not added")
                 # self.add_transaction_to_pool_tree(message)
         elif type(message) == Block:
             self.wallet.add_proposed_block(message)
