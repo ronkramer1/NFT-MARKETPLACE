@@ -13,17 +13,27 @@ class Transaction:
         self.sender = sender
         self.amount = amount
         self.signature = signature
-        self.fee = float(self.amount * FEE_CONSTANT / 100)
+        self.fee = float(self.amount * FEE_CONSTANT)
 
     def is_valid(self, blockchain):
         """returns true if the transaction is valid"""
         if not (self.serialize() == Transaction().serialize() and self in blockchain.chain[0].data):  # unless initial transaction for initial coin offering
             # check signature against sender and rest of transaction:
-            hash_of_transaction = self.generate_hash()
+            print("-------")
+            print(self.nft)
+            print(self.sender)
+            print(self.receiver)
+            print(self.amount)
+            print(self.fee)
+            print("-------")
+
+            hash_of_transaction = sha256_hash(self.nft, self.sender, self.receiver, self.amount, self.fee)
+            print(hash_of_transaction.digest())
             verifier = DSS.new(ECC.import_key(self.sender), STANDARD_FOR_SIGNATURES)
             try:
-                verifier.verify(hash_of_transaction, self.signature.encode())
+                verifier.verify(hash_of_transaction, eval(self.signature))
             except ValueError:
+                print("t1")
                 return False
 
             # check if the receiver and sender are valid (if it's a point on the elliptic curve):
@@ -49,7 +59,7 @@ class Transaction:
                 return False
 
             # check if fee is valid:
-            if float(self.fee) != float(self.amount * FEE_CONSTANT / 100):
+            if float(self.fee) != float(self.amount * FEE_CONSTANT):
                 return False
 
             # check if amount is more than 0, or different than zero in case of retrieving stake:
