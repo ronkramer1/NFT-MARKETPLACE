@@ -1,6 +1,7 @@
 from socket import *
 
 from block import Block
+from nft import NFT
 from transaction import Transaction
 from utils import UDP_PORT, NUMBER_OF_CONNECTED_CLIENTS, TCP_PORT, RECV_SIZE
 
@@ -74,6 +75,9 @@ class Peer:
         received_message = received_message.decode('utf-8')
 
         print("udp receive: " + received_message)
+
+        if received_message[:len("NFT")] == "NFT":
+            return NFT.deserialize(received_message[len("NFT"):])
 
         if received_message[:len("transaction:")] == "transaction:":
             return Transaction.deserialize(received_message[len("transaction:"):])

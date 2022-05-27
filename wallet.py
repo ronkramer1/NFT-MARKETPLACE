@@ -49,26 +49,32 @@ class Wallet:
         for validator in validators:
             weights.append(float(validators[validator]/total_staked))
 
-        selected_validator = random.choices(list(validators.keys()), weights=weights, k=1)[0]
+        if not validators:
+            print("error, no validators.")
+
+        else:
+            selected_validator = random.choices(list(validators.keys()), weights=weights, k=1)[0]
+            return selected_validator
+
         # return selected_validator, validators[selected_validator]
-        return selected_validator
 
     def add_proposed_block(self, block):
         """adds a block the the proposed blocks list"""
         self.proposed_blocks.append(block)
 
     def create_block(self):
-        block = self.blockchain.create_block(self.transaction_pool[-1])
-        signature = self.sign_block(block)
-        block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
-        block.signature = signature
-        self.transaction_pool = []
-        return block
+        if len(self.transaction_pool) >= NUM_OF_TRANSACTIONS_IN_BLOCK:
+            block = self.blockchain.create_block(self.transaction_pool[-1])
+            signature = self.sign_block(block)
+            block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
+            block.signature = signature
+            self.transaction_pool = []
+            return block
 
     def add_a_block_to_chain(self):
         """adds a block from the proposed blocks to the blockchain iff the block is valid and its validator is the current leader, also empties the transaction pool and the proposed blocks list"""
         # if len(self.proposed_blocks) > 10:
-        current_leader = self.get_leader()
+        current_leader = self.choose_validator()
         for block in self.proposed_blocks:
             if block.is_valid(self.blockchain) and block.validator == current_leader:
                 self.blockchain.chain.append(block)
