@@ -3,8 +3,11 @@ import hashlib
 import json
 import time
 
+from Crypto.PublicKey import ECC
+from Crypto.Signature import DSS
+
 from transaction import Transaction
-from utils import sha256_hash
+from utils import sha256_hash, STANDARD_FOR_SIGNATURES
 
 
 class Block:
@@ -16,6 +19,46 @@ class Block:
         self.prev_hash = prev_hash
         self.validator = validator
         self.signature = signature
+
+    def is_valid(self, blockchain):
+        """returns true iff the block is valid"""
+        if self != Block():  # allow the genesis block
+            # check transactions:
+            for transaction in self.data:
+                if not transaction.is_valid(blockchain):
+                    return False
+
+            # check signature:
+            serialized_data = []
+            transaction = self.data
+            serialized_data.append(transaction.serialize())  # serialize data so that it won't be an object, but a string
+            hash_of_block_content = sha256_hash(self.index, self.prev_hash, serialized_data)
+            verifier = DSS.new(ECC.import_key(self.validator), STANDARD_FOR_SIGNATURES)
+            try:
+                verifier.verify(hash_of_block_content, eval(self.signature))
+            except ValueError:
+                return False
+
+            # check block number:
+            if self.index != blockchain.chain[-1].block_number + 1:
+                return False
+
+            # check if everyone can pay all for all transactions in block:
+            senders = {}
+            for transaction in self.data:
+                if transaction.sender not in senders:
+                    senders[transaction.sender] = []
+                senders[transaction.sender].append(transaction)
+
+            for sender, transactions in senders.items():
+                senders_balance = blockchain.get_balance(sender)
+                total_amount = 0
+                for transaction in transactions:
+                    total_amount += (transaction.amount + transaction.fee)
+                if total_amount > senders_balance:
+                    return False
+
+        return True
 
     def generate_hash(self):
         return sha256_hash(self.index, self.data, self.timestamp, self.prev_hash, self.validator, self.signature).\
