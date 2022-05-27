@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 from select import select
@@ -11,7 +12,7 @@ from transaction import Transaction
 from utils import *
 from wallet import Wallet
 
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtWidgets as qtw, QtGui
 from PyQt5 import QtCore as qtc
 
 
@@ -22,7 +23,7 @@ class Main(qtw.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.setWindowFlag(qtc.Qt.FramelessWindowHint)
+        # self.setWindowFlag(qtc.Qt.FramelessWindowHint)
 
         self.wallet = None
         self.peer = Peer()
@@ -42,8 +43,21 @@ class Main(qtw.QMainWindow):
         self.ui.login_button.clicked.connect(self.login)
         self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
+        self.ui.browse_button.clicked.connect(self.browse_data)
+
+    def browse_data(self):
+        data_path = qtw.QFileDialog.getOpenFileName(self, 'Open File', "", '*.jpg', )
+        print(data_path)
+        pixmap = QtGui.QPixmap(data_path[0])
+        if not pixmap.isNull():
+            self.ui.image_label.setPixmap(pixmap)
 
     def enter_main_menu(self):
+        if self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators_dict():
+            self.is_validator = True
+        else:
+            self.is_validator = False
+
         self.ui.public_key_label.setText(str(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)))
         self.ui.balance_label.setText(str(self.wallet.blockchain.get_balance(self.wallet.public_key.export_key
                                                                              (format=PUBLIC_KEY_FORMAT))))
@@ -64,6 +78,7 @@ class Main(qtw.QMainWindow):
             with open("storage\\private key.txt", 'r') as protected_private_key_file:
                 protected_private_key = protected_private_key_file.read()
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
+                self.wallet.create_blockchain_file()
             self.request_missing_blocks()
             self.enter_main_menu()
         except ValueError as e:
@@ -136,7 +151,7 @@ class Main(qtw.QMainWindow):
 
     def make_blocks(self):
         """tries to make a block and send it, calls itself every five seconds"""
-        new_block = self.wallet.make_block()
+        new_block = self.wallet.create_block()
         if self.is_validator and new_block:
             self.peer.udp_send(new_block)
             # self.ui.transaction_pool_tree.clear()
@@ -248,44 +263,15 @@ class Main(qtw.QMainWindow):
         """starts requesting blocks that might be missing"""
         self.collect_blocks()
 
-    def finish_entering_wallet(self):
-        """shows the menu_frame, and setting up the gui with all information from the wallet"""
-        # self.ui.menu_frame.show()  # show the navigation menu after a wallet is created
-        # self.ui.stackedWidget.setCurrentWidget(self.ui.my_wallet_pg)  # go to "my wallet" page
-        # self.ui.public_key_lbl.setText(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT))
-        # self.create_blockchain_file()
-        # self.ui.current_balance_lbl.setText(str(self.wallet.get_balance()))
-        # try:
-        #     self.ui.current_stake_lbl.setText(str(self.wallet.blockchain.get_validators()[
-        #                                               self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
-        # except KeyError:
-        #     self.ui.current_stake_lbl.setText('0')
-        #
-        # with open(f"storage\\blockchain.json", "r") as blockchain_file:
-        #     self.put_json_chain_on_tree(blockchain_file)
-
-        if self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators():
-            self.is_validator = True
-        else:
-            self.is_validator = False
-
-        # with open(f"storage\\private key.txt", 'r') as secret_key_file:
-        #     self.ui.protected_private_key_lbl.setText(secret_key_file.read())
-
-        self.handle_blocks()
-        self.constant_receive()
-
     def update_blockchain_file(self):
         """updates the blockchain file with data from wallet"""
         with open(f"storage\\blockchain.json", "w") as blockchain_file:
             blockchain_file.write(self.wallet.blockchain.serialize())
-        # self.ui.current_balance_lbl.setText(str(self.wallet.get_balance()))
+        self.ui.label.setText(str(self.wallet.get_balance()))
         try:
-            pass
-            # self.ui.current_stake_lbl.setText(str(self.wallet.blockchain.get_validators()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
+            self.ui.staked_label.setText(str(self.wallet.blockchain.get_validators()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
         except KeyError:
-            pass
-            # self.ui.current_stake_lbl.setText('0')
+            self.ui.staked_label.setText('0')
 
     def collect_blocks(self):
         """collects blocks that might be missing from other peers"""
@@ -313,12 +299,12 @@ class Main(qtw.QMainWindow):
                     if received_message[:len("Block: ")] == "Block: ":
                         received_message = received_message[len("Block: "):]
                         received_block = Block.deserialize(received_message)
-                        if received_block.block_number not in [block.block_number for block in
+                        if received_block.index not in [block.index for block in
                                                                self.wallet.blockchain.chain]:  # if block number isn't alewady in chain
                             if sock not in missing_blocks_by_peer:
                                 missing_blocks_by_peer[sock] = []
                             missing_blocks_by_peer[sock].append(received_block)
-                            sock.send(f"position {received_block.block_number - 1}".encode('utf-8'))
+                            sock.send(f"position {received_block.index - 1}".encode('utf-8'))
                         else:
                             sock.send("finished".encode('utf-8'))
                             finished_so_far += 1
@@ -338,7 +324,7 @@ class Main(qtw.QMainWindow):
                 self.peer.close_server()
                 if finished_collecting_missing_blocks:
                     self.handle_collected_blocks(list(missing_blocks_by_peer.values()))
-                self.finish_entering_wallet()
+                self.enter_main_menu()
 
         collect_blocks_networking()
 
@@ -360,7 +346,7 @@ class Main(qtw.QMainWindow):
                 valid_collected_blocks_list_tuples = []
                 for valid_collected_block in valid_collected_blocks_lists:
                     valid_collected_blocks_list_tuples.append(
-                        (valid_collected_block.block_number, valid_collected_block.hash_block))
+                        (valid_collected_block.index, valid_collected_block.hash_block))
                 valid_collected_blocks_lists_list_tuples.append(valid_collected_blocks_list_tuples)
 
             correct_valid_collected_blocks_list_tuples = most_frequent(valid_collected_blocks_lists_list_tuples)
@@ -379,19 +365,18 @@ class Main(qtw.QMainWindow):
 
 
 if __name__ == "__main__":
+    # for handling exceptions:
+    sys._excepthook = sys.excepthook
+
+
+    def exception_hook(exctype, value, traceback):
+        print(traceback)
+        sys._excepthook(exctype, value, traceback)
+        sys.exit(1)
+
+    sys.excepthook = exception_hook
+
     app = qtw.QApplication(sys.argv)
     main = Main()
-    # main_wallet.create_blockchain_file()
-    # # second_wallet.create_blockchain_file()
-    # # # main.peer.udp_send(Block())
-    # main.constant_receive()
-    # print(main.wallet.blockchain)
-
     main.show()
     sys.exit(app.exec_())
-
-    # second_wallet.make_transaction_and_add_to_blockchain(STAKE_ADDRESS,
-    #                                                    55)
-
-    # print(main_wallet.blockchain)
-    # print(main_wallet.choose_validator())
