@@ -141,11 +141,11 @@ class Main(qtw.QMainWindow):
             # self.ui.transaction_pool_tree.clear()
             # self.ui.proposed_blocks_tree.clear()
 
-            # update blockchain file and blockchain tree:
-            self.update_blockchain_file()
-            with open(f"storage\\blockchain.json", "r") as blockchain_file:
-                pass
-                # self.put_json_chain_on_tree(blockchain_file)
+        # update blockchain file and blockchain tree:
+        self.update_blockchain_file()
+        with open(f"storage\\blockchain.json", "r") as blockchain_file:
+            pass
+            # self.put_json_chain_on_tree(blockchain_file)
 
         qtc.QTimer.singleShot(10000, self.add_blocks_to_chain)
 
@@ -270,7 +270,7 @@ class Main(qtw.QMainWindow):
         self.ui.label.setText(str(self.wallet.get_balance()))
         try:
             self.ui.staked_label.setText(str(
-                self.wallet.blockchain.get_validators()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
+                self.wallet.blockchain.get_validators_dict()[self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)]))
         except KeyError:
             self.ui.staked_label.setText('0')
 
