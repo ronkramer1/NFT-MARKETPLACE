@@ -60,6 +60,7 @@ class Main(qtw.QMainWindow):
         else:
             self.is_validator = False
 
+        self.ui.blockchain_label.setText(str(self.wallet.blockchain.serialize))
         self.ui.public_key_label.setText(str(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)))
         self.ui.balance_label.setText(str(self.wallet.blockchain.get_balance(self.wallet.public_key.export_key
                                                                              (format=PUBLIC_KEY_FORMAT))))
@@ -137,7 +138,7 @@ class Main(qtw.QMainWindow):
         if self.wallet.add_a_block_to_chain():
             # checking if validator now:
             if self.wallet.public_key.export_key(
-                    format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators():
+                    format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators_dict():
                 self.is_validator = True
             else:
                 self.is_validator = False
