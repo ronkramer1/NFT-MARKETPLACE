@@ -303,7 +303,8 @@ class Main(qtw.QMainWindow):
     def send_a_missing_block(self, position):
         """sends a block that might be missing for a newly connected peer on tcp"""
         block_to_send = [block for block in self.wallet.blockchain.chain if block.index == position][0]
-
+        print("sending:")
+        print(block_to_send)
         self.peer.tcp_client_send(block_to_send)
 
     def request_missing_blocks(self):
@@ -313,8 +314,12 @@ class Main(qtw.QMainWindow):
 
     def update_blockchain_file(self):
         """updates the blockchain file with data from wallet"""
+        wallet_serialized = self.wallet.blockchain.serialize()
+        blockchain_text = wallet_serialized
+        self.ui.blockchain_label.setText(blockchain_text)
+
         with open(f"storage\\blockchain.json", "w") as blockchain_file:
-            blockchain_file.write(self.wallet.blockchain.serialize())
+            blockchain_file.write(wallet_serialized)
         self.ui.balance_label.setText(str(self.wallet.get_balance()))
         try:
             self.ui.staked_label.setText(str(
@@ -353,9 +358,9 @@ class Main(qtw.QMainWindow):
                             if sock not in peers_and_missing_blocks_dict:
                                 peers_and_missing_blocks_dict[sock] = []
                             peers_and_missing_blocks_dict[sock].append(received_block)
-                            sock.send(f"position {received_block.index - 1}".encode())
+                            sock.send(f"position {received_block.index - 1}".encode('utf-8'))
                         else:
-                            sock.send("finished".encode())
+                            sock.send("finished".encode('utf-8'))
                             finished_collecting_peers += 1
                             if finished_collecting_peers >= NUMBER_OF_CONNECTED_CLIENTS:
                                 finished_collecting_missing_blocks = True

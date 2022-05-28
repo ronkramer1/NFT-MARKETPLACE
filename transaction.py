@@ -68,11 +68,11 @@ class Transaction:
             except KeyError:
                 return False
 
-            # # check if transaction is a duplicate of an existing transaction:
-            # for block in blockchain.chain:
-            #     transaction = block.data
-            #     if transaction == self:
-            #         return False
+            # check if transaction is a duplicate of an existing transaction:
+            for block in blockchain.chain:
+                transaction = block.data
+                if transaction == self:
+                    return False
 
         return True
 
