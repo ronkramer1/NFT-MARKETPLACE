@@ -144,10 +144,10 @@ class Main(qtw.QMainWindow):
             # self.ui.proposed_blocks_tree.clear()
 
         # update blockchain file and blockchain tree:
-        self.update_blockchain_file()
-        with open(f"storage\\blockchain.json", "r") as blockchain_file:
-            pass
-            # self.put_json_chain_on_tree(blockchain_file)
+            self.update_blockchain_file()
+            with open(f"storage\\blockchain.json", "r") as blockchain_file:
+                pass
+                # self.put_json_chain_on_tree(blockchain_file)
 
         qtc.QTimer.singleShot(10000, self.add_blocks_to_chain)
 
@@ -399,7 +399,8 @@ class Main(qtw.QMainWindow):
             for valid_collected_blocks_lists in valid_collected_blocks_lists_list:
                 valid_collected_blocks_list_tuples = []
                 for valid_collected_block in valid_collected_blocks_lists:
-                    valid_collected_blocks_list_tuples.append((valid_collected_block.block_number, valid_collected_block.hash_block))
+                    valid_collected_blocks_list_tuples.append((valid_collected_block.block_number,
+                                                               valid_collected_block.generate_hash().hexdigest()))
                 valid_collected_blocks_lists_list_tuples.append(valid_collected_blocks_list_tuples)
 
             correct_valid_collected_blocks_list_tuples = most_frequent(valid_collected_blocks_lists_list_tuples)
