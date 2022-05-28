@@ -92,11 +92,13 @@ class Wallet:
         """adds a block from the proposed blocks to the blockchain iff the block is valid and its validator is the current leader, also empties the transaction pool and the proposed blocks list"""
         # if len(self.proposed_blocks) > 10:
         current_leader = self.choose_validator()
+        self.proposed_blocks.reverse()
         for block in self.proposed_blocks:
             if block.is_valid(self.blockchain):  # and block.validator == current_leader:
                 self.blockchain.chain.append(block)
                 self.transaction_pool = []
-                self.proposed_blocks = []
+                # self.proposed_blocks = []
+                self.proposed_blocks.remove(self.proposed_blocks[0])
                 return True
         return False
 

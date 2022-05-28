@@ -399,7 +399,7 @@ class Main(qtw.QMainWindow):
             for valid_collected_blocks_lists in valid_collected_blocks_lists_list:
                 valid_collected_blocks_list_tuples = []
                 for valid_collected_block in valid_collected_blocks_lists:
-                    valid_collected_blocks_list_tuples.append((valid_collected_block.block_number,
+                    valid_collected_blocks_list_tuples.append((valid_collected_block.index,
                                                                valid_collected_block.generate_hash().hexdigest()))
                 valid_collected_blocks_lists_list_tuples.append(valid_collected_blocks_list_tuples)
 
