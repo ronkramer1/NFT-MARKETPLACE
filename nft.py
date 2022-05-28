@@ -3,7 +3,7 @@ import json
 
 class NFT:
     def __init__(self, image=None, name="", owner="", creator=""):
-        self.image = str(image)
+        self.image = image
         self.name = name
         self.owner = owner
         self.creator = creator

@@ -47,7 +47,7 @@ class Main(qtw.QMainWindow):
         self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
         self.ui.browse_button.clicked.connect(self.select_image)
-        self.ui.send_nft_button.clicked()
+        # self.ui.send_nft_button.clicked.connect(self.)
         self.ui.stop_waiting_button.clicked.connect(self.stop_waiting_for_blocks)
         self.ui.send_kcn_button.clicked.connect(self.send_transaction)
 
@@ -82,9 +82,7 @@ class Main(qtw.QMainWindow):
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
                 self.wallet.create_blockchain_file()
 
-            self.ui.stackedWidget.setCurrentWidget(self.ui.waiting_page)
             self.request_missing_blocks()
-            # self.enter_main_menu()
 
         except ValueError as e:
             qtw.QMessageBox.critical(None, 'Fail',
@@ -119,7 +117,6 @@ class Main(qtw.QMainWindow):
                 with open(f"storage/encrypted private key.txt", 'w') as secret_key_file:
                     secret_key_file.write(protected_secret_key)
                 self.request_missing_blocks()
-                self.enter_main_menu()
             except ValueError:
                 qtw.QMessageBox.critical(None, 'Fail',
                                          "password doesn't match the protected private key that was provided.")
@@ -235,7 +232,8 @@ class Main(qtw.QMainWindow):
         buf = io.BytesIO()
         image_resize.save(buf, format='JPEG')
         byte_image = buf.getvalue()
-        self.send_nft(byte_image)
+        self.display_image(byte_image)
+        # self.send_nft(byte_image)
         # self.display_image(byte_image)
         # orig_image = Image.open(io.BytesIO(byte_image))
         return byte_image
@@ -310,6 +308,7 @@ class Main(qtw.QMainWindow):
 
     def request_missing_blocks(self):
         """starts requesting blocks that might be missing"""
+        self.ui.stackedWidget.setCurrentWidget(self.ui.waiting_page)
         self.collect_blocks()
 
     def update_blockchain_file(self):
