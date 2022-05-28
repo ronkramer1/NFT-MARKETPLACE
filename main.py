@@ -139,7 +139,7 @@ class Main(qtw.QMainWindow):
         if self.wallet.add_a_block_to_chain():
             # checking if validator now:
             if self.wallet.public_key.export_key(
-                    format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators_dict():
+                    format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators():
                 self.is_validator = True
             else:
                 self.is_validator = False
