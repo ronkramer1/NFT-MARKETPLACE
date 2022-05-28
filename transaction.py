@@ -7,13 +7,16 @@ from utils import *
 
 
 class Transaction:
-    def __init__(self, nft=None, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature=""):
+    def __init__(self, nft=None, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature="", fee=-999):
         self.nft = nft
         self.receiver = receiver
         self.sender = sender
         self.amount = amount
         self.signature = signature
-        self.fee = float(self.amount * FEE_CONSTANT)
+        if fee:
+            self.fee = 0
+        else:
+            self.fee = float(self.amount * FEE_CONSTANT)
 
     def is_valid(self, blockchain):
         """returns true if the transaction is valid"""

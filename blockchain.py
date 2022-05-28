@@ -7,8 +7,13 @@ from utils import *
 class Blockchain:
     def __init__(self, chain=None):
         if chain is None:
-            chain = [Block()]
-        self.chain = chain
+            self.chain = [Block(data=Transaction(fee=0))]
+            self.create_block(Transaction(receiver=STAKE_ADDRESS, sender=INITIAL_COIN_HOLDER, amount=100, fee=0))
+        else:
+            self.chain = chain
+        # if chain is None:
+        #     chain = [Block()]
+        # self.chain = chain
 
     def create_block(self, data=None):
         index = self.chain[-1].index + 1
@@ -52,6 +57,7 @@ class Blockchain:
         return sum_value
 
     def serialize(self):
+        print(self)
         blockchain_dict = dict(self.__dict__)
         block_list = []
         for block in blockchain_dict["chain"]:
