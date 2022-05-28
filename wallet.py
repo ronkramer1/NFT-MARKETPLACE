@@ -64,7 +64,6 @@ class Wallet:
             signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
             signature = str(signer.sign(block_hash))
             block.validator = self.choose_validator()
-            block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
             block.signature = signature
             self.transaction_pool = []
             return block

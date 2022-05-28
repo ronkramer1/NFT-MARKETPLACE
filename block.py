@@ -37,9 +37,8 @@ class Block:
             except ValueError:
                 return False
 
-            # check block number:
+            # # check block number:
             # if self.index != blockchain.chain[-1].index + 1:
-            #     print("t1")
             #     return False
 
             # # check if everyone can pay all for all transactions in block:
