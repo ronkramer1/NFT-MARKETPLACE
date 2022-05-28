@@ -60,7 +60,8 @@ class Main(qtw.QMainWindow):
         else:
             self.is_validator = False
 
-        self.ui.blockchain_label.setText(str(self.wallet.blockchain.serialize))
+        blockchain_text = self.wallet.blockchain.serialize()
+        self.ui.blockchain_label.setText(blockchain_text)
         self.ui.public_key_label.setText(str(self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT)))
         self.ui.balance_label.setText(str(self.wallet.blockchain.get_balance(self.wallet.public_key.export_key
                                                                              (format=PUBLIC_KEY_FORMAT))))
