@@ -18,6 +18,7 @@ class Wallet:
 
         self.public_key = self.private_key.public_key()
         self.blockchain = blockchain
+        print("blockchain in wallet: " + str(self.blockchain))
 
         self.transaction_pool = []
         self.proposed_blocks = []
@@ -62,6 +63,7 @@ class Wallet:
             block_hash = sha256_hash(block.index, block.prev_hash, block.data.serialize())
             signer = DSS.new(self.private_key, STANDARD_FOR_SIGNATURES)
             signature = str(signer.sign(block_hash))
+            block.validator = self.choose_validator()
             block.validator = self.public_key.export_key(format=PUBLIC_KEY_FORMAT)
             block.signature = signature
             self.transaction_pool = []

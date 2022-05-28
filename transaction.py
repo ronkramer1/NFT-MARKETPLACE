@@ -7,16 +7,13 @@ from utils import *
 
 
 class Transaction:
-    def __init__(self, nft=None, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature="", fee=-999):
+    def __init__(self, nft=None, receiver=INITIAL_COIN_HOLDER, sender="", amount=NUMBER_OF_COINS, signature=""):
         self.nft = nft
         self.receiver = receiver
         self.sender = sender
         self.amount = amount
         self.signature = signature
-        if fee:
-            self.fee = 0
-        else:
-            self.fee = float(self.amount * FEE_CONSTANT)
+        self.fee = float(self.amount * FEE_CONSTANT)
 
     def is_valid(self, blockchain):
         """returns true if the transaction is valid"""
@@ -53,16 +50,16 @@ class Transaction:
                 return False
 
             # check if fee is valid:
-            # if float(self.fee) != float(self.amount * FEE_CONSTANT):
-            #     return False
+            if float(self.fee) != float(self.amount * FEE_CONSTANT):
+                return False
 
             # check if amount is more than 0, or different than zero in case of retrieving stake:
             if (self.receiver != STAKE_ADDRESS and float(self.amount) <= 0) or (self.receiver == STAKE_ADDRESS and float(self.amount) == 0):
                 return False
 
             # check if the amount can be sent by sender:
-            # if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
-            #     return False
+            if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
+                return False
 
             if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators()[self.sender] < -self.amount):
                 return False

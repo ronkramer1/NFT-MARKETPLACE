@@ -278,7 +278,6 @@ class Main(qtw.QMainWindow):
 
     def update_blockchain_file(self):
         """updates the blockchain file with data from wallet"""
-        print("tries to update")
         with open(f"storage\\blockchain.json", "w") as blockchain_file:
             blockchain_file.write(self.wallet.blockchain.serialize())
         self.ui.balance_label.setText(str(self.wallet.get_balance()))
