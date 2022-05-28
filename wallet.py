@@ -18,7 +18,6 @@ class Wallet:
 
         self.public_key = self.private_key.public_key()
         self.blockchain = blockchain
-        print("blockchain in wallet: " + str(self.blockchain))
 
         self.transaction_pool = []
         self.proposed_blocks = []

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui.ui'
+# Form implementation generated from reading ui file 'nft.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -354,7 +354,7 @@ class Ui_MainWindow(object):
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setObjectName("scroll_area")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 874, 573))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 81, 37))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_14 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_14.setObjectName("verticalLayout_14")
@@ -366,20 +366,24 @@ class Ui_MainWindow(object):
         self.scroll_area.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout_13.addWidget(self.scroll_area)
         self.tab_widget.addTab(self.blockchain_page, "")
-        self.tab = QtWidgets.QWidget()
-        self.tab.setObjectName("tab")
-        self.verticalLayout_15 = QtWidgets.QVBoxLayout(self.tab)
+        self.maketplace_page = QtWidgets.QWidget()
+        self.maketplace_page.setObjectName("maketplace_page")
+        self.verticalLayout_15 = QtWidgets.QVBoxLayout(self.maketplace_page)
         self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_15.setSpacing(0)
         self.verticalLayout_15.setObjectName("verticalLayout_15")
-        self.marketplace_page = QtWidgets.QFrame(self.tab)
-        self.marketplace_page.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.marketplace_page.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.marketplace_page.setObjectName("marketplace_page")
-        self.verticalLayout_16 = QtWidgets.QVBoxLayout(self.marketplace_page)
-        self.verticalLayout_16.setObjectName("verticalLayout_16")
-        self.verticalLayout_15.addWidget(self.marketplace_page)
-        self.tab_widget.addTab(self.tab, "")
+        self.frame_9 = QtWidgets.QFrame(self.maketplace_page)
+        self.frame_9.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_9.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_9.setObjectName("frame_9")
+        self.gridLayout = QtWidgets.QGridLayout(self.frame_9)
+        self.gridLayout.setObjectName("gridLayout")
+        self.marketplace_image_label = QtWidgets.QLabel(self.frame_9)
+        self.marketplace_image_label.setText("")
+        self.marketplace_image_label.setObjectName("marketplace_image_label")
+        self.gridLayout.addWidget(self.marketplace_image_label, 0, 0, 1, 1)
+        self.verticalLayout_15.addWidget(self.frame_9)
+        self.tab_widget.addTab(self.maketplace_page, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.tab_2)
@@ -406,6 +410,9 @@ class Ui_MainWindow(object):
         self.browse_button = QtWidgets.QPushButton(self.frame_10)
         self.browse_button.setObjectName("browse_button")
         self.verticalLayout_18.addWidget(self.browse_button)
+        self.send_nft_button = QtWidgets.QPushButton(self.frame_10)
+        self.send_nft_button.setObjectName("send_nft_button")
+        self.verticalLayout_18.addWidget(self.send_nft_button)
         self.verticalLayout_17.addWidget(self.frame_10)
         self.tab_widget.addTab(self.tab_2, "")
         self.send_knc_page = QtWidgets.QWidget()
@@ -456,7 +463,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "NFT Marketplace"))
         self.name_label.setText(_translate("MainWindow", "NFT Marketplace"))
         self.minimize_button.setText(_translate("MainWindow", "-"))
         self.maximize_button.setText(_translate("MainWindow", "+"))
@@ -487,8 +494,9 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "Collection"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.wallet_page), _translate("MainWindow", "Wallet"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.blockchain_page), _translate("MainWindow", "Blockchain"))
-        self.tab_widget.setTabText(self.tab_widget.indexOf(self.tab), _translate("MainWindow", "Marketplace"))
+        self.tab_widget.setTabText(self.tab_widget.indexOf(self.maketplace_page), _translate("MainWindow", "Marketplace"))
         self.browse_button.setText(_translate("MainWindow", "browse"))
+        self.send_nft_button.setText(_translate("MainWindow", "send NFT"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.tab_2), _translate("MainWindow", "Sell NFT"))
         self.label_15.setText(_translate("MainWindow", "Send to (public key):"))
         self.label_16.setText(_translate("MainWindow", "Amount (KNC):"))

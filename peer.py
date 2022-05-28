@@ -30,7 +30,9 @@ class Peer:
 
     def udp_send(self, to_send):
         """formats and broadcasts a udp message"""
-        if type(to_send) == Transaction:
+        if type(to_send) == NFT:
+            self.udp_send_raw("NFT:" + to_send.serialize())
+        elif type(to_send) == Transaction:
             self.udp_send_raw("transaction:" + to_send.serialize())
         elif type(to_send) == Block:
             self.udp_send_raw("block:" + to_send.serialize())
@@ -74,8 +76,8 @@ class Peer:
         (received_message, sender_address) = self.udp_receive_raw()
         received_message = received_message.decode('utf-8')
 
-        if received_message[:len("NFT")] == "NFT":
-            return NFT.deserialize(received_message[len("NFT"):])
+        if received_message[:len("NFT:")] == "NFT:":
+            return NFT.deserialize(received_message[len("NFT:"):])
 
         if received_message[:len("transaction:")] == "transaction:":
             return Transaction.deserialize(received_message[len("transaction:"):])

@@ -3,15 +3,13 @@ import json
 
 class NFT:
     def __init__(self, image=None, name="", owner="", creator=""):
-        self.image = image
+        self.image = str(image)
         self.name = name
         self.owner = owner
         self.creator = creator
 
     def serialize(self):
         nft_dict = dict(self.__dict__)
-        transaction = nft_dict["data"]
-        nft_dict["data"] = transaction.__dict__
         return str(json.dumps(nft_dict, indent=4))
 
     @staticmethod

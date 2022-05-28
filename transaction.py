@@ -13,7 +13,7 @@ class Transaction:
         self.sender = sender
         self.amount = amount
         self.signature = signature
-        self.fee = float(self.amount * FEE_CONSTANT)
+        self.fee = abs(float(self.amount * FEE_CONSTANT))
 
     def is_valid(self, blockchain):
         """returns true if the transaction is valid"""
@@ -50,7 +50,7 @@ class Transaction:
                 return False
 
             # check if fee is valid:
-            if float(self.fee) != float(self.amount * FEE_CONSTANT):
+            if float(self.fee) != abs(float(self.amount * FEE_CONSTANT)):
                 return False
 
             # check if amount is more than 0, or different than zero in case of retrieving stake:
@@ -61,7 +61,11 @@ class Transaction:
             if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
                 return False
 
-            if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators_dict()[self.sender] < -self.amount):
+            try:
+                if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) \
+                        and (blockchain.get_validators_dict()[self.sender] < -self.amount):
+                    return False
+            except KeyError:
                 return False
 
             # # check if transaction is a duplicate of an existing transaction:

@@ -1,3 +1,4 @@
+import io
 import os
 import sys
 import time
@@ -7,6 +8,7 @@ from Crypto.PublicKey import ECC
 
 from block import Block
 from gui import Ui_MainWindow
+from nft import NFT
 from peer import Peer
 from transaction import Transaction
 from utils import *
@@ -15,6 +17,7 @@ from wallet import Wallet
 from PyQt5 import QtWidgets as qtw, QtGui
 from PyQt5 import QtCore as qtc
 
+from PIL import Image
 
 class Main(qtw.QMainWindow):
 
@@ -43,16 +46,10 @@ class Main(qtw.QMainWindow):
         self.ui.login_button.clicked.connect(self.login)
         self.ui.create_wallet_button.clicked.connect(self.create_wallet)
         self.ui.retrieve_wallet_button.clicked.connect(self.create_wallet_with_private_key)
-        self.ui.browse_button.clicked.connect(self.browse_data)
+        self.ui.browse_button.clicked.connect(self.select_image)
+        self.ui.send_nft_button.clicked()
         self.ui.stop_waiting_button.clicked.connect(self.stop_waiting_for_blocks)
         self.ui.send_kcn_button.clicked.connect(self.send_transaction)
-
-    def browse_data(self):
-        data_path = qtw.QFileDialog.getOpenFileName(self, 'Open File', "", '*.jpg', )
-        print(data_path)
-        pixmap = QtGui.QPixmap(data_path[0])
-        if not pixmap.isNull():
-            self.ui.image_label.setPixmap(pixmap)
 
     def enter_main_menu(self):
         if self.wallet.public_key.export_key(format=PUBLIC_KEY_FORMAT) in self.wallet.blockchain.get_validators_dict():
@@ -80,7 +77,7 @@ class Main(qtw.QMainWindow):
     def login(self):
         password = self.ui.login_password_line.text()
         try:
-            with open("storage\\private key.txt", 'r') as protected_private_key_file:
+            with open("storage/encrypted private key.txt", 'r') as protected_private_key_file:
                 protected_private_key = protected_private_key_file.read()
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
                 self.wallet.create_blockchain_file()
@@ -98,7 +95,7 @@ class Main(qtw.QMainWindow):
     def create_wallet(self):
         self.wallet = Wallet()
         password = self.ui.create_password_line.text()
-        with open(f"storage\\private key.txt", 'w') as private_key_file:
+        with open(f"storage/encrypted private key.txt", 'w') as private_key_file:
             if password:
                 private_key_file.write(self.wallet.private_key.export_key(format=PRIVATE_KEY_FORMAT,
                                                                           passphrase=password,
@@ -119,7 +116,7 @@ class Main(qtw.QMainWindow):
             protected_secret_key = self.ui.retrieve_protected_key_line.text()
             try:
                 self.wallet = Wallet(ECC.import_key(protected_secret_key, passphrase=password))
-                with open(f"storage\\private key.txt", 'w') as secret_key_file:
+                with open(f"storage/encrypted private key.txt", 'w') as secret_key_file:
                     secret_key_file.write(protected_secret_key)
                 self.request_missing_blocks()
                 self.enter_main_menu()
@@ -177,7 +174,7 @@ class Main(qtw.QMainWindow):
                 qtw.QMessageBox.critical(None, 'Fail', "public key is incorrect")
                 return
         password = self.ui.send_kcn_password_line.text()
-        with open(f"storage\\private key.txt", 'r') as secret_key_file:
+        with open(f"storage/encrypted private key.txt", 'r') as secret_key_file:
             protected_secret_key = secret_key_file.read()
             try:
                 Wallet(ECC.import_key(protected_secret_key, passphrase=password))
@@ -217,24 +214,56 @@ class Main(qtw.QMainWindow):
                 qtw.QMessageBox.critical(None, 'Fail',
                                          "amount must be more than zero when not retrieving coins from stake, or different to zero when retrieving or staking coins.")
 
-    def recreate_wallet2(self, password):
-        try:
-            with open(f"storage\\private key 2.txt", 'r') as secret_key_file:
-                protected_secret_key = secret_key_file.read()
-                self.wallet = Wallet(ECC.import_key(protected_secret_key, passphrase=password))
-        except ValueError:
-            print("password doesn't match the protected private key that was provided.")
-        except (IndexError, FileNotFoundError) as e:
-            print("there is no wallet on this device.")
+    def display_image(self, byte_image):
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData(byte_image)
 
-        return self.wallet
+        if not pixmap.isNull():
+            resized_pixmap = pixmap.scaled(400, 400, qtc.Qt.AspectRatioMode.KeepAspectRatio)
+            self.ui.marketplace_image_label.setPixmap(resized_pixmap)
+
+    def select_image(self):
+        data_path = qtw.QFileDialog.getOpenFileName(self, 'Open File', "", '*.jpg', )
+        # print(data_path)
+        pixmap = QtGui.QPixmap(data_path[0])
+        if not pixmap.isNull():
+            resized_pixmap = pixmap.scaled(400, 400, qtc.Qt.AspectRatioMode.KeepAspectRatio)
+            self.ui.image_label.setPixmap(resized_pixmap)
+
+        image = Image.open(data_path[0])
+        image_resize = image.resize((400, 400))
+        buf = io.BytesIO()
+        image_resize.save(buf, format='JPEG')
+        byte_image = buf.getvalue()
+        self.send_nft(byte_image)
+        # self.display_image(byte_image)
+        # orig_image = Image.open(io.BytesIO(byte_image))
+        return byte_image
+
+    def send_nft(self, byte_image):
+        # pixmap = self.ui.image_label.pixmap()
+        # ba = qtc.QByteArray()
+        # buff = qtc.QBuffer(ba)
+        # buff.open(qtc.QIODevice.WriteOnly)
+        # pixmap_bytes = ba.data()
+        # self.display_image(pixmap_bytes)
+        if byte_image:
+            self.peer.udp_send(NFT(byte_image))
+            qtw.QMessageBox.information(None, 'Success', "successfully sent the NFT.")
+        else:
+            qtw.QMessageBox.critical(None, 'Fail',
+                                     "error when sending NFT")
+
+        # orig_image = Image.open(io.BytesIO(byte_image))
+        # print(bytes(image))
+        # print(Image.frombytes(bytes(image)))
 
     def constant_receive(self):
         """tries to receive messages from other peers (both tcp and udp), calls itself every 0.1 seconds"""
         if self.peer.tcp_client:
-            rlist, wlist, xlist = select([self.peer.udp_receiver, self.peer.tcp_client], [], [], 0.01)
+            rlist, _, _ = select([self.peer.udp_receiver, self.peer.tcp_client], [], [], 0.01)
         else:
-            rlist, wlist, xlist = select([self.peer.udp_receiver], [], [], 0.01)
+            rlist, _, _ = select([self.peer.udp_receiver], [], [], 0.01)
         for sock in rlist:
             if sock == self.peer.udp_receiver:
                 received_message = self.peer.udp_receive()
@@ -255,6 +284,10 @@ class Main(qtw.QMainWindow):
 
     def received_from_udp_socket(self, message):
         """handles a message that was received by the udp receiver socket"""
+        if type(message) == NFT:
+            self.display_image(message.image)
+            # orig_image = Image.open(io.BytesIO(message.image))
+            # self.ui.image_label.setPixmap()
         if type(message) == Transaction:
             if self.wallet.add_transaction_to_pool(message):
                 print("added")
