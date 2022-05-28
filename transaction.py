@@ -61,7 +61,7 @@ class Transaction:
             if blockchain.get_balance(self.sender) < (float(self.amount) + float(self.fee)):
                 return False
 
-            if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators()[self.sender] < -self.amount):
+            if (self.receiver == STAKE_ADDRESS) and (self.amount < 0) and (blockchain.get_validators_dict()[self.sender] < -self.amount):
                 return False
 
             # # check if transaction is a duplicate of an existing transaction:
