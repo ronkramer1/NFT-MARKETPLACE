@@ -69,6 +69,7 @@ class Main(qtw.QMainWindow):
         except KeyError:
             self.ui.staked_label.setText('0')
 
+        self.wallet.create_blockchain_file()
         self.ui.stackedWidget.setCurrentWidget(self.ui.main_page)
 
         self.handle_blocks()
@@ -80,8 +81,7 @@ class Main(qtw.QMainWindow):
             with open("storage/encrypted private key.txt", 'r') as protected_private_key_file:
                 protected_private_key = protected_private_key_file.read()
                 self.wallet = Wallet(ECC.import_key(protected_private_key, passphrase=password))
-                self.wallet.create_blockchain_file()
-
+                # self.wallet.create_blockchain_file()
             self.request_missing_blocks()
 
         except ValueError as e:
@@ -297,14 +297,10 @@ class Main(qtw.QMainWindow):
             # self.add_block_to_proposed_tree(message)
         elif type(message) == str and message[:len("connected")] == "connected":
             self.send_a_missing_block(self.wallet.blockchain.chain[-1].index)
-        else:
-            print("received: " + str(message))
 
     def send_a_missing_block(self, position):
         """sends a block that might be missing for a newly connected peer on tcp"""
         block_to_send = [block for block in self.wallet.blockchain.chain if block.index == position][0]
-        print("sending:")
-        print(block_to_send)
         self.peer.tcp_client_send(block_to_send)
 
     def request_missing_blocks(self):
@@ -411,6 +407,8 @@ class Main(qtw.QMainWindow):
                 self.wallet.add_proposed_block(correct_valid_collected_block)
                 if not self.wallet.add_a_block_to_chain():
                     self.request_missing_blocks()
+                else:
+                    self.update_blockchain_file()
 
             with open(f"storage\\blockchain.json", "w") as blockchain_file:
                 pass
